@@ -1,0 +1,12 @@
+# python
+*pyc
+__pycache__
+.ipynb_checkpoints/
+
+# Custom
+.DS_Store
+test_*
+*.csv
+*.root
+*~
+tkinter*
