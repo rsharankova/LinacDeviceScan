@@ -6,34 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>966</width>
-    <height>635</height>
+    <width>1083</width>
+    <height>645</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Phase scan </string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="read_monitor_pushButton">
-    <property name="geometry">
-     <rect>
-      <x>550</x>
-      <y>220</y>
-      <width>161</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Plot monitor devices</string>
-    </property>
-   </widget>
    <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
       <x>30</x>
       <y>30</y>
-      <width>491</width>
-      <height>241</height>
+      <width>400</width>
+      <height>220</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -42,13 +29,13 @@
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
     </property>
-    <widget class="QWidget" name="verticalLayoutWidget">
+    <widget class="QWidget" name="verticalLayoutWidget_3">
      <property name="geometry">
       <rect>
-       <x>-1</x>
-       <y>-1</y>
-       <width>491</width>
-       <height>241</height>
+       <x>0</x>
+       <y>0</y>
+       <width>401</width>
+       <height>221</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="phases_verticalLayout"/>
@@ -57,15 +44,25 @@
    <widget class="QWidget" name="gridLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>320</y>
-      <width>356</width>
-      <height>61</height>
+      <x>620</x>
+      <y>310</y>
+      <width>321</width>
+      <height>71</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="1" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Measurements</string>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="1">
       <widget class="QSpinBox" name="numevents_spinBox">
+       <property name="minimum">
+        <number>1</number>
+       </property>
        <property name="maximum">
         <number>10000</number>
        </property>
@@ -74,52 +71,42 @@
      <item row="1" column="0">
       <widget class="QComboBox" name="event_comboBox"/>
      </item>
-     <item row="0" column="0">
+     <item row="0" column="0" alignment="Qt::AlignHCenter">
       <widget class="QLabel" name="label_1">
        <property name="text">
         <string>Event</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="label_2">
+     <item row="1" column="2">
+      <widget class="QSpinBox" name="steps_spinBox">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label_6">
        <property name="text">
-        <string>Measurements</string>
+        <string>Steps</string>
        </property>
       </widget>
      </item>
     </layout>
    </widget>
-   <widget class="QPushButton" name="plot_phases_pushButton">
-    <property name="geometry">
-     <rect>
-      <x>580</x>
-      <y>30</y>
-      <width>113</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Plot phases</string>
-    </property>
-   </widget>
    <widget class="QWidget" name="gridLayoutWidget_2">
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>280</y>
+      <y>270</y>
       <width>190</width>
       <height>304</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="0">
-      <widget class="QPushButton" name="selectall_pushButton">
-       <property name="text">
-        <string>Select all</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="1">
       <widget class="QPushButton" name="clearall_pushButton">
        <property name="text">
@@ -127,10 +114,10 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_3">
+     <item row="0" column="0">
+      <widget class="QPushButton" name="selectall_pushButton">
        <property name="text">
-        <string>Phase set</string>
+        <string>Select all</string>
        </property>
       </widget>
      </item>
@@ -139,68 +126,22 @@
        <property name="text">
         <string>Delta (deg)</string>
        </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QCheckBox" name="checkBox_1">
-       <property name="text">
-        <string>RFQ</string>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_1">
+     <item row="8" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
        <property name="singleStep">
         <double>0.500000000000000</double>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QCheckBox" name="checkBox_2">
-       <property name="text">
-        <string>RFB</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+     <item row="7" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
        <property name="singleStep">
         <double>0.500000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QCheckBox" name="checkBox_3">
-       <property name="text">
-        <string>Tank 1</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
-       <property name="singleStep">
-        <double>0.500000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QCheckBox" name="checkBox_4">
-       <property name="text">
-        <string>Tank 2</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
-       <property name="singleStep">
-        <double>0.500000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QCheckBox" name="checkBox_5">
-       <property name="text">
-        <string>Tank 3</string>
        </property>
       </widget>
      </item>
@@ -211,15 +152,29 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
-      <widget class="QCheckBox" name="checkBox_6">
-       <property name="text">
-        <string>Tank 4</string>
+     <item row="5" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
+       <property name="singleStep">
+        <double>0.500000000000000</double>
        </property>
       </widget>
      </item>
-     <item row="7" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
+     <item row="4" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+       <property name="singleStep">
+        <double>0.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+       <property name="singleStep">
+        <double>0.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_1">
        <property name="singleStep">
         <double>0.500000000000000</double>
        </property>
@@ -232,83 +187,72 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
-       <property name="singleStep">
-        <double>0.500000000000000</double>
+     <item row="7" column="0">
+      <widget class="QCheckBox" name="checkBox_6">
+       <property name="text">
+        <string>Tank 4</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QCheckBox" name="checkBox_5">
+       <property name="text">
+        <string>Tank 3</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QCheckBox" name="checkBox_4">
+       <property name="text">
+        <string>Tank 2</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QCheckBox" name="checkBox_3">
+       <property name="text">
+        <string>Tank 1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QCheckBox" name="checkBox_2">
+       <property name="text">
+        <string>RFB</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QCheckBox" name="checkBox_1">
+       <property name="text">
+        <string>RFQ</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Phase set</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
     </layout>
    </widget>
-   <widget class="QListWidget" name="listWidget">
-    <property name="geometry">
-     <rect>
-      <x>560</x>
-      <y>100</y>
-      <width>151</width>
-      <height>111</height>
-     </rect>
-    </property>
-    <property name="selectionMode">
-     <enum>QAbstractItemView::MultiSelection</enum>
-    </property>
-    <item>
-     <property name="text">
-      <string>L:TO1IN</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>L:TO3IN</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>L:TO5OUT</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>L:D7TOR</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>L:D7LMSM</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>G:LINEFF</string>
-     </property>
-    </item>
-   </widget>
-   <widget class="QLabel" name="label_4">
-    <property name="geometry">
-     <rect>
-      <x>560</x>
-      <y>70</y>
-      <width>151</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Select monitor devices</string>
-    </property>
-   </widget>
    <widget class="QWidget" name="gridLayoutWidget_3">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>350</x>
       <y>430</y>
       <width>651</width>
-      <height>141</height>
+      <height>131</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
      <property name="sizeConstraint">
-      <enum>QLayout::SetFixedSize</enum>
+      <enum>QLayout::SetDefaultConstraint</enum>
      </property>
      <item row="0" column="1">
       <widget class="QPushButton" name="displayList_pushButton">
@@ -386,18 +330,156 @@
      </item>
     </layout>
    </widget>
-   <widget class="QLabel" name="label_5">
+   <widget class="QWidget" name="verticalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>50</y>
+      <width>166</width>
+      <height>183</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QPushButton" name="plot_phases_pushButton">
+       <property name="text">
+        <string>Plot phases</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Select monitor devices</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QListWidget" name="listWidget">
+       <property name="selectionMode">
+        <enum>QAbstractItemView::MultiSelection</enum>
+       </property>
+       <item>
+        <property name="text">
+         <string>L:TO1IN</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:TO3IN</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:TO5OUT</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D7TOR</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D7LMSM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>G:LINEFF</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="read_monitor_pushButton">
+       <property name="text">
+        <string>Plot monitor devices</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QFrame" name="frame_2">
     <property name="geometry">
      <rect>
       <x>670</x>
-      <y>410</y>
-      <width>136</width>
-      <height>16</height>
+      <y>30</y>
+      <width>400</width>
+      <height>220</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Output filename:</string>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
     </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QWidget" name="verticalLayoutWidget_4">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>401</width>
+       <height>221</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="monitors_verticalLayout"/>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>290</y>
+      <width>111</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Scan type</string>
+    </property>
+    <property name="checkable">
+     <bool>false</bool>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+    <widget class="QWidget" name="verticalLayoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>9</x>
+       <y>19</y>
+       <width>91</width>
+       <height>91</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QRadioButton" name="oneD_radioButton">
+        <property name="text">
+         <string>1-D</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="nD_radioButton">
+        <property name="text">
+         <string>N-D</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -405,13 +487,44 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>966</width>
+     <width>1083</width>
      <height>24</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <tabstops>
+  <tabstop>clearall_pushButton</tabstop>
+  <tabstop>numevents_spinBox</tabstop>
+  <tabstop>plot_phases_pushButton</tabstop>
+  <tabstop>event_comboBox</tabstop>
+  <tabstop>selectall_pushButton</tabstop>
+  <tabstop>read_monitor_pushButton</tabstop>
+  <tabstop>checkBox_1</tabstop>
+  <tabstop>doubleSpinBox_1</tabstop>
+  <tabstop>checkBox_2</tabstop>
+  <tabstop>doubleSpinBox_2</tabstop>
+  <tabstop>checkBox_3</tabstop>
+  <tabstop>doubleSpinBox_3</tabstop>
+  <tabstop>checkBox_4</tabstop>
+  <tabstop>doubleSpinBox_4</tabstop>
+  <tabstop>checkBox_5</tabstop>
+  <tabstop>doubleSpinBox_5</tabstop>
+  <tabstop>checkBox_6</tabstop>
+  <tabstop>doubleSpinBox_6</tabstop>
+  <tabstop>checkBox_7</tabstop>
+  <tabstop>doubleSpinBox_7</tabstop>
+  <tabstop>listWidget</tabstop>
+  <tabstop>displayList_pushButton</tabstop>
+  <tabstop>genList_pushButton</tabstop>
+  <tabstop>writeList_pushButton</tabstop>
+  <tabstop>scan_pushButton</tabstop>
+  <tabstop>displayScan_pushButton</tabstop>
+  <tabstop>writeScan_pushButton</tabstop>
+  <tabstop>scan_plainTextEdit</tabstop>
+  <tabstop>list_plainTextEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

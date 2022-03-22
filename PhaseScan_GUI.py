@@ -16,13 +16,6 @@ class Main(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.ramplist = []
         self.scanresults = []
-        self.param_dict = {'RFQ':{'device':'L:RFQPAH','idx':1,'selected':False,'phase':0,'delta':0},
-                           'RFB':{'device':'L:RFBPAH','idx':2,'selected':False,'phase':0,'delta':0},
-                           'Tank 1':{'device':'L:V1QSET','idx':3,'selected':False,'phase':0,'delta':0},
-                           'Tank 2':{'device':'L:V2QSET','idx':4,'selected':False,'phase':0,'delta':0},
-                           'Tank 3':{'device':'L:V3QSET','idx':5,'selected':False,'phase':0,'delta':0},
-                           'Tank 4':{'device':'L:V4QSET','idx':6,'selected':False,'phase':0,'delta':0},
-                           'Tank 5':{'device':'L:V5QSET','idx':7,'selected':False,'phase':0,'delta':0}}
         self.phasescan = phasescan()
         self.init_plot()
         self.event_comboBox.addItems(['0a','52','53'])
@@ -34,20 +27,25 @@ class Main(QMainWindow, Ui_MainWindow):
 
 
     def add_param(self):
-        for key in self.param_dict:
+        for key in self.phasescan.param_dict:
             for checkBox in self.findChildren(QCheckBox):
                 if checkBox.isChecked() and checkBox.text()==key:
-                    self.param_dict[key]['selected']=True
-                    self.param_dict[key]['phase']=self.phasescan.get_phases_once([self.param_dict[key]['device']])[0]
-                elif checkBox.isChecked()==False and checkBox.text()==key:
-                    self.param_dict[key]['selected']=False
-                    self.param_dict[key]['phase']=0
-        #print(self.param_dict.values())
+                    self.phasescan.param_dict[key]['selected']=True
 
+                elif checkBox.isChecked()==False and checkBox.text()==key:
+                    self.phasescan.param_dict[key]['selected']=False
+                    self.phasescan.param_dict[key]['phase']=0
+        #print(self.phasescan.param_dict.values())
+
+    def read_phases(self):
+        for key in self.phasescan.param_dict:
+            if self.phasescan.param_dict[key]['selected']==True:
+                self.phasescan.param_dict[key]['phase']=self.phasescan.get_phases_once([self.phasescan.param_dict[key]['device']])[0]
+                
     def read_deltas(self):
-        for key in self.param_dict:
-            if self.param_dict[key]['selected']==True:
-                self.param_dict[key]['delta']=self.findChild(QDoubleSpinBox,'doubleSpinBox_%d'%(self.param_dict[key]['idx'])).value()
+        for key in self.phasescan.param_dict:
+            if self.phasescan.param_dict[key]['selected']==True:
+                self.phasescan.param_dict[key]['delta']=self.findChild(QDoubleSpinBox,'doubleSpinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
 
                     
     def select_all(self):
@@ -65,21 +63,28 @@ class Main(QMainWindow, Ui_MainWindow):
         self.canvas = FigureCanvas(self.fig)
         self.phases_verticalLayout.addWidget(self.canvas)
 
-    def update_plot(self):
+        self.fig1 = Figure()
+        self.ax1 = self.fig1.add_subplot(111)
+        self.canvas1 = FigureCanvas(self.fig1)
+        self.monitors_verticalLayout.addWidget(self.canvas1)
 
+        
+    def update_plot(self):
+        self.read_phases()
         try:
             self.ax.cla()
-            phases = [ self.param_dict[key]['phase'] for key in self.param_dict if self.param_dict[key]['selected']==True]
-            self.ax.bar([i for i in range(len(phases))],height=phases)
-            self.ax.set_ylabel('Phase (deg)')
-            self.ax.set_xticks([i for i in range(len(phases))],[ key for key in self.param_dict if self.param_dict[key]['selected']==True])
+            phases = [ self.phasescan.param_dict[key]['phase'] for key in self.phasescan.param_dict if self.phasescan.param_dict[key]['selected']==True]
+            self.ax.barh([i for i in range(len(phases))],phases)
+            self.ax.set_xlabel('Phase set (deg)')
+            self.ax.set_yticks([i for i in range(len(phases))],[ key for key in self.phasescan.param_dict if self.phasescan.param_dict[key]['selected']==True])
             self.canvas.draw_idle()
         except:
-            print('bugger')
+            print('Cannot update plot')
         
     def generate_ramp_list(self):
+        self.read_phases()
         numevents = self.numevents_spinBox.value()
-        self.ramplist = self.phasescan.make_ramp_list(self.param_dict,numevents)
+        self.ramplist = self.phasescan.make_ramp_list(self.phasescan.param_dict,numevents)
 
     def write_list(self):        
         if not self.list_plainTextEdit.toPlainText():

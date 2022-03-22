@@ -38,6 +38,13 @@ async def read_settings(con,drf_list):
 class phasescan:
     def __init__(self):
         self.paramlist = ['Z:CUBE_X','Z:CUBE_Y','Z:CUBE_Z']
+        self.param_dict = {'RFQ':{'device':'L:RFQPAH','idx':1,'selected':False,'phase':0,'delta':0},
+                           'RFB':{'device':'L:RFBPAH','idx':2,'selected':False,'phase':0,'delta':0},
+                           'Tank 1':{'device':'L:V1QSET','idx':3,'selected':False,'phase':0,'delta':0},
+                           'Tank 2':{'device':'L:V2QSET','idx':4,'selected':False,'phase':0,'delta':0},
+                           'Tank 3':{'device':'L:V3QSET','idx':5,'selected':False,'phase':0,'delta':0},
+                           'Tank 4':{'device':'L:V4QSET','idx':6,'selected':False,'phase':0,'delta':0},
+                           'Tank 5':{'device':'L:V5QSET','idx':7,'selected':False,'phase':0,'delta':0}}
         
     def build_device_list(self,devlist):
         drf_list=[]
