@@ -102,8 +102,18 @@ class Main(QMainWindow, Ui_MainWindow):
     def generate_ramp_list(self):
         self.read_phases()
         numevents = self.numevents_spinBox.value()
-        self.ramplist = self.phasescan.make_ramp_list(self.phasescan.param_dict,numevents)
-
+        steps = self.steps_spinBox.value()
+        if self.oneD_radioButton.isChecked():
+            try:
+                self.ramplist = self.phasescan.make_ramp_list(self.phasescan.param_dict,numevents)
+            except:
+                print('Cannot generate 1-D ramp list.')
+        elif self.nD_radioButton.isChecked():
+           try:
+               self.ramplist = self.phasescan.make_loop_ramp_list(self.phasescan.param_dict,steps,numevents)
+           except:
+               print('Cannot generate nested ramp list.')
+               
     def write_list(self):        
         if not self.list_plainTextEdit.toPlainText():
             print('Using default filename')

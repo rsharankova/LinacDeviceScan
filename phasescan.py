@@ -92,3 +92,37 @@ class phasescan:
                 ramplist.append(l.copy())
         ramplist[0][0]='0'
         return ramplist
+
+    def make_loop_ramp_list(self,param_dict,steps,numevents):
+        limits = []
+        for dev in param_dict:
+            if param_dict[dev]['selected']==True:
+                limits.append([dev,param_dict[dev]['phase'],param_dict[dev]['delta'],steps])
+        print(limits)
+
+        ramplist = []
+        par = [None]*len(limits)
+        self.do_loop(len(limits),limits,steps,numevents,par,ramplist)
+
+        ramplist[0][0] = '0'
+        return ramplist
+        
+    def do_loop(self,N,limits,steps,numevents,par,ramplist):
+
+        if N==0:
+            return
+        else:
+            for i in range(int(steps+1)):
+                par[N-1] = limits[N-1][1] - limits[N-1][2] + i*(2*limits[N-1][2]/limits[N-1][3])
+                self.do_loop(N-1,limits,steps,numevents,par,ramplist)
+
+                line = [1]
+                if (N==1):
+                    for j in range(len(par)):
+                        line.append(limits[N-1+j][0])
+                        line.append(par[j])
+
+                    #print (line)
+                    for k in range(numevents):
+                        ramplist.append(line.copy())
+
