@@ -22,7 +22,7 @@ async def apply_settings(con,device_list,value_list,settings_role):
             break
     return None
 
-async def read_settings(con,drf_list):
+async def read_once(con,drf_list):
     settings = [None]*len(drf_list)
     async with acsys.dpm.DPMContext(con) as dpm:
         for i in range(len(drf_list)):
@@ -46,23 +46,33 @@ class phasescan:
                            'Tank 4':{'device':'L:V4QSET','idx':6,'selected':False,'phase':0,'delta':0},
                            'Tank 5':{'device':'L:V5QSET','idx':7,'selected':False,'phase':0,'delta':0}}
         
-    def build_device_list(self,devlist):
+    def build_set_device_list(self,devlist):
         drf_list=[]
         for dev in devlist:
             drf = f'{dev}.SETTING'
             drf_list.append(drf)
             
         return drf_list
-
-    def get_phases_once(self,paramlist):
+    
+    def get_settings_once(self,paramlist):
         if paramlist and len(paramlist)!=0:
-            drf_list = self.build_device_list(paramlist)
+            drf_list = self.build_set_device_list(paramlist)
         else:
             print('Device list empty. Reading dummy devices')
-            drf_list = self.build_device_list(self.paramlist)
-        phases= acsys.run_client(read_settings, drf_list=drf_list) 
+            drf_list = self.build_set_device_list(self.paramlist)
+        phases= acsys.run_client(read_once, drf_list=drf_list) 
         return phases
 
+    def get_readings_once(self,paramlist):
+        if paramlist and len(paramlist)!=0:
+            drf_list = paramlist
+        else:
+            print('Device list empty. Reading dummy devices')
+            drf_list = self.paramlist
+        phases= acsys.run_client(read_once, drf_list=drf_list) 
+        return phases
+
+    
     def make_ramp_list(self,param_dict,numevents):
         tmplist = []
         done_first_ref=False

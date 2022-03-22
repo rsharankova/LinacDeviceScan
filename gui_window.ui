@@ -531,7 +531,7 @@
    <sender>plot_phases_pushButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>update_plot()</slot>
+   <slot>update_phase_plot()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>305</x>
@@ -671,9 +671,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>read_monitor_pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>update_monitor_plot()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>552</x>
+     <y>240</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>541</x>
+     <y>322</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>update_plot()</slot>
+  <slot>update_phase_plot()</slot>
+  <slot>update_monitor_plot()</slot>
   <slot>add_param()</slot>
   <slot>select_all()</slot>
   <slot>clear_all()</slot>

@@ -3,6 +3,8 @@ from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QDoubleSpinBox, QPl
 from PyQt6.QtCore import Qt
 from phasescan import phasescan
 
+import numpy as np
+
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import (
     FigureCanvas,
@@ -40,13 +42,15 @@ class Main(QMainWindow, Ui_MainWindow):
     def read_phases(self):
         for key in self.phasescan.param_dict:
             if self.phasescan.param_dict[key]['selected']==True:
-                self.phasescan.param_dict[key]['phase']=self.phasescan.get_phases_once([self.phasescan.param_dict[key]['device']])[0]
+                self.phasescan.param_dict[key]['phase']=self.phasescan.get_settings_once([self.phasescan.param_dict[key]['device']])[0]
                 
     def read_deltas(self):
         for key in self.phasescan.param_dict:
             if self.phasescan.param_dict[key]['selected']==True:
                 self.phasescan.param_dict[key]['delta']=self.findChild(QDoubleSpinBox,'doubleSpinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
 
+    #def read_monitors(self):
+    #    for item in self.
                     
     def select_all(self):
         for checkBox in self.findChildren(QCheckBox):
@@ -69,7 +73,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.monitors_verticalLayout.addWidget(self.canvas1)
 
         
-    def update_plot(self):
+    def update_phase_plot(self):
         self.read_phases()
         try:
             self.ax.cla()
@@ -78,9 +82,23 @@ class Main(QMainWindow, Ui_MainWindow):
             self.ax.set_xlabel('Phase set (deg)')
             self.ax.set_yticks([i for i in range(len(phases))],[ key for key in self.phasescan.param_dict if self.phasescan.param_dict[key]['selected']==True])
             self.canvas.draw_idle()
+
         except:
-            print('Cannot update plot')
-        
+            print('Cannot update phase plot')
+
+    def update_monitor_plot(self):
+        items = [item.text() for item in self.listWidget.selectedItems()]
+        items.sort()
+        mons = np.asarray(self.phasescan.get_readings_once(items))
+        try:
+            self.ax1.cla()
+            self.ax1.bar([i for i in range(len(mons))],height=mons)
+            self.ax1.set_xticks([i for i in range(len(mons))],items)
+            self.canvas1.draw_idle()
+
+        except:
+            print('Cannot update monitor plot')
+
     def generate_ramp_list(self):
         self.read_phases()
         numevents = self.numevents_spinBox.value()
