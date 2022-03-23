@@ -6,59 +6,48 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1083</width>
-    <height>645</height>
+    <width>1037</width>
+    <height>422</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Phase scan </string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QFrame" name="frame">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>30</y>
-      <width>400</width>
-      <height>220</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QWidget" name="verticalLayoutWidget_3">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>401</width>
-       <height>221</height>
-      </rect>
-     </property>
-     <layout class="QVBoxLayout" name="phases_verticalLayout"/>
-    </widget>
-   </widget>
    <widget class="QWidget" name="gridLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>620</x>
-      <y>310</y>
-      <width>321</width>
-      <height>71</height>
+      <x>840</x>
+      <y>30</y>
+      <width>104</width>
+      <height>131</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="1" alignment="Qt::AlignHCenter">
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QLabel" name="label_1">
+       <property name="text">
+        <string>Event</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="event_comboBox"/>
+     </item>
+     <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Measurements</string>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
       </widget>
      </item>
-     <item row="1" column="1">
+     <item>
       <widget class="QSpinBox" name="numevents_spinBox">
        <property name="minimum">
         <number>1</number>
@@ -68,24 +57,14 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QComboBox" name="event_comboBox"/>
-     </item>
-     <item row="0" column="0" alignment="Qt::AlignHCenter">
-      <widget class="QLabel" name="label_1">
-       <property name="text">
-        <string>Event</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="gridLayoutWidget_2">
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>270</y>
-      <width>291</width>
+      <y>30</y>
+      <width>305</width>
       <height>304</height>
      </rect>
     </property>
@@ -299,15 +278,22 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="expand_pushButton_1">
+       <property name="text">
+        <string>Plot phases</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="gridLayoutWidget_3">
     <property name="geometry">
      <rect>
       <x>400</x>
-      <y>430</y>
-      <width>601</width>
-      <height>131</height>
+      <y>240</y>
+      <width>581</width>
+      <height>91</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
@@ -324,7 +310,7 @@
      <item row="0" column="0">
       <widget class="QPushButton" name="genList_pushButton">
        <property name="text">
-        <string>Generate ramp list</string>
+        <string>Make ramp list</string>
        </property>
       </widget>
      </item>
@@ -345,7 +331,7 @@
      <item row="1" column="1">
       <widget class="QPushButton" name="displayScan_pushButton">
        <property name="text">
-        <string>Display data</string>
+        <string>Display scan</string>
        </property>
       </widget>
      </item>
@@ -393,23 +379,13 @@
    <widget class="QWidget" name="verticalLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>470</x>
-      <y>50</y>
-      <width>166</width>
-      <height>183</height>
+      <x>400</x>
+      <y>30</y>
+      <width>141</width>
+      <height>131</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="QPushButton" name="plot_phases_pushButton">
-       <property name="text">
-        <string>Plot phases</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QLabel" name="label_4">
        <property name="text">
@@ -417,6 +393,9 @@
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -701,50 +680,13 @@
        </item>
       </widget>
      </item>
-     <item>
-      <widget class="QPushButton" name="plot_monitor_pushButton">
-       <property name="text">
-        <string>Plot monitor devices</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
     </layout>
-   </widget>
-   <widget class="QFrame" name="frame_2">
-    <property name="geometry">
-     <rect>
-      <x>670</x>
-      <y>30</y>
-      <width>400</width>
-      <height>220</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QWidget" name="verticalLayoutWidget_4">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>401</width>
-       <height>221</height>
-      </rect>
-     </property>
-     <layout class="QVBoxLayout" name="monitors_verticalLayout"/>
-    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>280</y>
+      <x>650</x>
+      <y>30</y>
       <width>111</width>
       <height>111</height>
      </rect>
@@ -791,18 +733,38 @@
      </layout>
     </widget>
    </widget>
-   <widget class="QPushButton" name="expand1_pushButton">
+   <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>160</x>
-      <y>0</y>
-      <width>113</width>
-      <height>32</height>
+      <x>400</x>
+      <y>180</y>
+      <width>421</width>
+      <height>41</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Expand</string>
-    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="expand_pushButton_2">
+       <property name="text">
+        <string>Plot monitors</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="loss_pushButton">
+       <property name="text">
+        <string>Plot Losses</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="current_pushButton">
+       <property name="text">
+        <string>Plot Currents</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -810,7 +772,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1083</width>
+     <width>1037</width>
      <height>24</height>
     </rect>
    </property>
@@ -818,9 +780,7 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <tabstops>
-  <tabstop>plot_phases_pushButton</tabstop>
   <tabstop>listWidget</tabstop>
-  <tabstop>plot_monitor_pushButton</tabstop>
   <tabstop>selectall_pushButton</tabstop>
   <tabstop>clearall_pushButton</tabstop>
   <tabstop>checkBox_1</tabstop>
@@ -846,7 +806,6 @@
   <tabstop>steps_spinBox_7</tabstop>
   <tabstop>oneD_radioButton</tabstop>
   <tabstop>nD_radioButton</tabstop>
-  <tabstop>event_comboBox</tabstop>
   <tabstop>numevents_spinBox</tabstop>
   <tabstop>genList_pushButton</tabstop>
   <tabstop>displayList_pushButton</tabstop>
@@ -859,22 +818,6 @@
  </tabstops>
  <resources/>
  <connections>
-  <connection>
-   <sender>plot_phases_pushButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>toggle_phase_plot()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>305</x>
-     <y>324</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>565</x>
-     <y>409</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>selectall_pushButton</sender>
    <signal>clicked()</signal>
@@ -1004,26 +947,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>plot_monitor_pushButton</sender>
+   <sender>expand_pushButton_1</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>toggle_monitor_plot()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>552</x>
-     <y>240</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>541</x>
-     <y>322</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>expand1_pushButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>expand()</slot>
+   <slot>expandPhase()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>216</x>
@@ -1035,10 +962,56 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>expand_pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>expandMon()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>836</x>
+     <y>39</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>541</x>
+     <y>322</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>loss_pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>barLosses()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>617</x>
+     <y>213</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>518</x>
+     <y>210</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>current_pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>barTors()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>753</x>
+     <y>213</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>518</x>
+     <y>210</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>toggle_phase_plot()</slot>
-  <slot>toggle_monitor_plot()</slot>
   <slot>add_param()</slot>
   <slot>select_all()</slot>
   <slot>clear_all()</slot>
@@ -1048,6 +1021,9 @@
   <slot>scan()</slot>
   <slot>write_scan_results()</slot>
   <slot>display_scan_results()</slot>
-  <slot>expand()</slot>
+  <slot>expandPhase()</slot>
+  <slot>expandMon()</slot>
+  <slot>barLosses()</slot>
+  <slot>barTors()</slot>
  </slots>
 </ui>

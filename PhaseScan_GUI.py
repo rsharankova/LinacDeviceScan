@@ -20,7 +20,6 @@ class Main(QMainWindow, Ui_MainWindow):
         self.ramplist = []
         self.scanresults = []
         self.phasescan = phasescan()
-        self.init_plot()
         self.event_comboBox.addItems(['0a','52','53','15Hz'])
 
         for checkBox in self.findChildren(QCheckBox):
@@ -67,123 +66,7 @@ class Main(QMainWindow, Ui_MainWindow):
         for checkBox in self.findChildren(QCheckBox):
             checkBox.setChecked(False)
 
-    def init_plot(self):
-        self.fig = Figure()
-        self.ax = self.fig.add_subplot(111)
-        self.canvas = FigureCanvas(self.fig)
-        self.phases_verticalLayout.addWidget(self.canvas)
 
-        self.timer = self.canvas.new_timer(200)
-        self.timer.add_callback(self.update_phase_plot)
-        
-        self.fig1 = Figure()
-        self.ax1 = self.fig1.add_subplot(111)
-        self.canvas1 = FigureCanvas(self.fig1)
-        self.monitors_verticalLayout.addWidget(self.canvas1)
-
-        self.timer1 = self.canvas1.new_timer(200)
-        self.timer1.add_callback(self.update_monitor_plot)
-
-
-    def toggle_phase_plot(self):
-
-        selected = [dev for dev in self.phasescan.param_dict if self.phasescan.param_dict[dev]['selected']==True]
-        if self.plot_phases_pushButton.isChecked() and len(selected)>0:
-            self.xaxis = np.array([])
-            self.yaxes = [np.array([]) for i in range(len(selected))]
-            self.timer.start()
-        elif self.plot_phases_pushButton.isChecked()==False: 
-            self.timer.stop()
-        else:
-            self.timer.stop()
-            self.plot_phases_pushButton.setChecked(False)
-            
-    def update_phase_plot(self):
-        
-        try:
-            self.read_phases()
-            phases = [ self.phasescan.param_dict[key]['phase'] for key in self.phasescan.param_dict if self.phasescan.param_dict[key]['selected']==True]
-            self.ax.cla()
-            self.ax.set_ylim([-50.,250.])
-            self.xaxis = np.append(self.xaxis,datetime.now())
-            for i,ph in enumerate(phases): 
-                self.yaxes[i] = np.append(self.yaxes[i],ph)
-                self.ax.plot(self.xaxis,self.yaxes[i])
-            
-            self.fig.subplots_adjust(left=0.13)
-            self.fig.subplots_adjust(right=0.95)
-            self.fig.subplots_adjust(bottom=0.12)
-            self.fig.subplots_adjust(top=0.95)
-            
-            self.canvas.draw_idle()
-
-        except Exception as e:
-            print('Cannot update phase plot',e)
-
-    def toggle_monitor_plot(self):
-
-        selected = [item.text() for item in self.listWidget.selectedItems()]
-        if self.plot_monitor_pushButton.isChecked() and len(selected)>0:
-            self.xaxis1 = np.array([])
-            self.yaxes1 = [np.array([]) for i in range(len(selected))]
-            self.timer1.start()
-        elif self.plot_monitor_pushButton.isChecked()==False: 
-            self.timer1.stop()
-        elif self.plot_monitor_pushButton.isChecked() and len(selected)==0:
-            self.timer1.stop()
-            self.plot_monitor_pushButton.setChecked(False)
-            
-    def update_monitor_plot(self):
-        items = [item.text() for item in self.listWidget.selectedItems()]
-
-        try:
-            mons = np.asarray(self.phasescan.get_readings_once(items))
-            self.ax1.cla()
-            self.xaxis1 = np.append(self.xaxis1,datetime.now())
-            for i,mon in enumerate(mons):
-                self.yaxes1[i] = np.append(self.yaxes1[i],mon)
-                self.ax1.plot(self.xaxis1,self.yaxes1[i])
-
-            self.fig1.subplots_adjust(left=0.1)
-            self.fig1.subplots_adjust(right=0.95)
-            self.fig1.subplots_adjust(bottom=0.22)
-            self.fig1.subplots_adjust(top=0.95)
-            self.canvas1.draw_idle()
-
-        except Exception as e:
-            print('Cannot update monitor plot',e)
-
-    def toggle_L11_plot(self):
-
-        selected = [item.text() for item in self.listWidget.selectedItems()]
-        if self.plot_monitor_pushButton.isChecked() and len(selected)>0:
-            self.timer1.start()
-        elif self.plot_monitor_pushButton.isChecked()==False: 
-            self.timer1.stop()
-        elif self.plot_monitor_pushButton.isChecked() and len(selected)==0:
-            self.timer1.stop()
-            self.plot_monitor_pushButton.setChecked(False)
-            
-
-    def update_L11_plot(self):
-        items = [item.text() for item in self.listWidget.selectedItems()]
-
-        try:
-            mons = np.asarray(self.phasescan.get_readings_once(items))
-            self.ax1.cla()
-            self.ax1.set_ylim([0.,50.])
-            self.ax1.bar([i for i in range(len(mons))],height=mons)
-            self.ax1.set_xticks([i for i in range(len(mons))],items,rotation = 'vertical',fontsize=6)
-            self.fig1.subplots_adjust(left=0.1)
-            self.fig1.subplots_adjust(right=0.95)
-            self.fig1.subplots_adjust(bottom=0.22)
-            self.fig1.subplots_adjust(top=0.95)
-            self.canvas1.draw_idle()
-
-        except Exception as e:
-            print('Cannot update monitor plot',e)
-
-            
     def generate_ramp_list(self):
         self.read_phases()
         numevents = self.numevents_spinBox.value()
@@ -239,32 +122,120 @@ class Main(QMainWindow, Ui_MainWindow):
             print('Something went wrong')
 
 
-    def expand(self):
-        """Launch the employee dialog."""
-        dlg = ExpandPlot(self)
-        dlg.exec()
+    def expandMon(self):
+        selected = [item.text() for item in self.listWidget.selectedItems()]
+        dlg = TimePlot(selected,self)
+        dlg.show()
+
+    def expandPhase(self):
+        selected = [ self.phasescan.param_dict[key]['device'] for key in self.phasescan.param_dict if self.phasescan.param_dict[key]['selected']==True]
+        dlg = TimePlot(selected,self)
+        dlg.show()
+
+    def barLosses(self):
+        #selected = [item.text() for i in self.listWidget.count() if self.listWidget.item(i).text().find('LM')!=-1]
+        selected = [self.listWidget.item(i).text() for i in range(self.listWidget.count()) if self.listWidget.item(i).text().find('LM')!=-1]
+        dlg = BarPlot(selected,self)
+        dlg.show()
+        
+    def barTors(self):
+        selected = [self.listWidget.item(i).text() for i in range(self.listWidget.count()) if self.listWidget.item(i).text().find('TO')!=-1]
+        dlg = BarPlot(selected,self)
+        dlg.show()
+
             
-            
-class ExpandPlot(QDialog):
-    """Expand plot."""
-    def __init__(self, parent=None):
+class TimePlot(QDialog):
+    def __init__(self, selected,parent=None):
         super().__init__(parent)
         loadUi("expandPlot.ui", self)
+        self.selected = selected
         self.init_plot()
 
     def init_plot(self):
-        #self.fig = Figure()
-        self.fig = self.parent().fig
-        #self.ax = self.fig.add_subplot(111)
-        self.ax = self.parent().ax
+        self.fig = Figure()
+        self.ax = self.fig.add_subplot(111)
         self.canvas = FigureCanvas(self.fig)
         self.verticalLayout.addWidget(self.canvas)
 
-        self.timer = self.parent().timer
-        #self.timer = self.canvas.new_timer(200)
-        #self.timer.add_callback(self.parent().update_phase_plot)
-    
+        self.timer = self.canvas.new_timer(200)
+        self.timer.add_callback(self.update_plot)
+        
+
+    def toggle_plot(self):
+        if self.plot_pushButton.isChecked() and len(self.selected)>0:
+            self.xaxis = np.array([])
+            self.yaxes = [np.array([]) for i in range(len(self.selected))]
+            self.timer.start()
+        elif self.plot_pushButton.isChecked()==False: 
+            self.timer.stop()
+        elif self.plot_pushButton.isChecked() and len(self.selected)==0:
+            self.timer.stop()
+            self.plot_pushButton.setChecked(False)
             
+    def update_plot(self):
+        try:
+            self.ax.cla()
+            self.xaxis = np.append(self.xaxis,datetime.now())
+            data = np.asarray(self.parent().phasescan.get_readings_once(self.selected))
+            for i,d in enumerate(data):
+                self.yaxes[i] = np.append(self.yaxes[i],d)
+                self.ax.plot(self.xaxis,self.yaxes[i])
+
+            self.fig.subplots_adjust(left=0.1)
+            self.fig.subplots_adjust(right=0.95)
+            self.fig.subplots_adjust(bottom=0.22)
+            self.fig.subplots_adjust(top=0.95)
+            self.canvas.draw_idle()
+
+        except Exception as e:
+            print('Cannot update time plot',e)
+
+            
+class BarPlot(QDialog):
+    """Bar plot."""
+    def __init__(self, selected, parent=None):
+        super().__init__(parent)
+        loadUi("expandPlot.ui", self)
+        self.selected = selected
+        self.init_plot()
+
+    def init_plot(self):
+        self.fig = Figure()
+        self.ax = self.fig.add_subplot(111)
+        self.canvas = FigureCanvas(self.fig)
+        self.verticalLayout.addWidget(self.canvas)
+
+        self.timer = self.canvas.new_timer(200)
+        self.timer.add_callback(self.update_plot)
+        
+
+    def toggle_plot(self):
+        if self.plot_pushButton.isChecked() and len(self.selected)>0:
+            self.timer.start()
+        elif self.plot_pushButton.isChecked()==False: 
+            self.timer.stop()
+        elif self.plot_pushButton.isChecked() and len(self.selected)==0:
+            self.timer.stop()
+            self.plot_pushButton.setChecked(False)
+            
+    def update_plot(self):
+        try:
+            data = np.asarray(self.parent().phasescan.get_readings_once(self.selected))
+            self.ax.cla()
+            self.ax.set_ylim([0.,max(data)])
+            self.ax.bar([i for i in range(len(data))],height=data)
+            self.ax.set_xticks([i for i in range(len(data))],self.selected,rotation = 'vertical',fontsize=6)
+
+            self.fig.subplots_adjust(left=0.1)
+            self.fig.subplots_adjust(right=0.95)
+            self.fig.subplots_adjust(bottom=0.22)
+            self.fig.subplots_adjust(top=0.95)
+            self.canvas.draw_idle()
+
+        except Exception as e:
+            print('Cannot update bar plot',e)
+
+        
 if __name__ == '__main__':
     import sys
     from PyQt6.QtWidgets import QApplication

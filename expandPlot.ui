@@ -59,6 +59,22 @@
     <layout class="QVBoxLayout" name="verticalLayout"/>
    </widget>
   </widget>
+  <widget class="QPushButton" name="plot_pushButton">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>400</y>
+     <width>113</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Plot</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections>
@@ -94,5 +110,24 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>plot_pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>Dialog</receiver>
+   <slot>toggle_plot()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>356</x>
+     <y>415</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>234</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>toggle_plot()</slot>
+ </slots>
 </ui>
