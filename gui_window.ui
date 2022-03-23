@@ -405,6 +405,9 @@
        <property name="text">
         <string>Plot phases</string>
        </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -699,9 +702,12 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="read_monitor_pushButton">
+      <widget class="QPushButton" name="plot_monitor_pushButton">
        <property name="text">
         <string>Plot monitor devices</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -801,7 +807,7 @@
  <tabstops>
   <tabstop>plot_phases_pushButton</tabstop>
   <tabstop>listWidget</tabstop>
-  <tabstop>read_monitor_pushButton</tabstop>
+  <tabstop>plot_monitor_pushButton</tabstop>
   <tabstop>selectall_pushButton</tabstop>
   <tabstop>clearall_pushButton</tabstop>
   <tabstop>checkBox_1</tabstop>
@@ -844,7 +850,7 @@
    <sender>plot_phases_pushButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>update_phase_plot()</slot>
+   <slot>toggle_phase_plot()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>305</x>
@@ -985,10 +991,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>read_monitor_pushButton</sender>
+   <sender>plot_monitor_pushButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>update_monitor_plot()</slot>
+   <slot>toggle_monitor_plot()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>552</x>
@@ -1002,8 +1008,8 @@
   </connection>
  </connections>
  <slots>
-  <slot>update_phase_plot()</slot>
-  <slot>update_monitor_plot()</slot>
+  <slot>toggle_phase_plot()</slot>
+  <slot>toggle_monitor_plot()</slot>
   <slot>add_param()</slot>
   <slot>select_all()</slot>
   <slot>clear_all()</slot>

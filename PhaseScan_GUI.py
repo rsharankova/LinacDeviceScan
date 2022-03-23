@@ -70,33 +70,46 @@ class Main(QMainWindow, Ui_MainWindow):
     def init_plot(self):
         self.fig = Figure()
         self.ax = self.fig.add_subplot(111)
-        self.xaxis = np.array([])
-        self.yaxis = np.array([])
         self.canvas = FigureCanvas(self.fig)
         self.phases_verticalLayout.addWidget(self.canvas)
 
         self.timer = self.canvas.new_timer(200)
-        #self.timer.add_callback(self.update_phase_plot)
-        #self.timer.start()
+        self.timer.add_callback(self.update_phase_plot)
         
         self.fig1 = Figure()
         self.ax1 = self.fig1.add_subplot(111)
         self.canvas1 = FigureCanvas(self.fig1)
         self.monitors_verticalLayout.addWidget(self.canvas1)
 
-        
-    def update_phase_plot(self):
+        self.timer1 = self.canvas1.new_timer(200)
+        self.timer1.add_callback(self.update_monitor_plot)
 
+
+    def toggle_phase_plot(self):
+
+        selected = [dev for dev in self.phasescan.param_dict if self.phasescan.param_dict[dev]['selected']==True]
+        if self.plot_phases_pushButton.isChecked() and len(selected)>0:
+            self.xaxis = np.array([])
+            self.yaxes = [np.array([]) for i in range(len(selected))]
+            self.timer.start()
+        elif self.plot_phases_pushButton.isChecked()==False: 
+            self.timer.stop()
+        else:
+            self.timer.stop()
+            self.plot_phases_pushButton.setChecked(False)
+            
+    def update_phase_plot(self):
+        
         try:
             self.read_phases()
             phases = [ self.phasescan.param_dict[key]['phase'] for key in self.phasescan.param_dict if self.phasescan.param_dict[key]['selected']==True]
-            #self.xaxis = np.appen(self.xaxis,datetime.now())
-            #self.yaxis = np.append(self.yaxis,phases[0])
             self.ax.cla()
-            #seld.ax.plot(self.xaxis,self.yaxis)
-            self.ax.barh([i for i in range(len(phases))],phases)
-            self.ax.set_xlabel('Phase set (deg)')
-            self.ax.set_yticks([i for i in range(len(phases))],[ key for key in self.phasescan.param_dict if self.phasescan.param_dict[key]['selected']==True],fontsize=8)
+            self.ax.set_ylim([-50.,250.])
+            self.xaxis = np.append(self.xaxis,datetime.now())
+            for i,ph in enumerate(phases): 
+                self.yaxes[i] = np.append(self.yaxes[i],ph)
+                self.ax.plot(self.xaxis,self.yaxes[i])
+            
             self.fig.subplots_adjust(left=0.13)
             self.fig.subplots_adjust(right=0.95)
             self.fig.subplots_adjust(bottom=0.12)
@@ -104,15 +117,61 @@ class Main(QMainWindow, Ui_MainWindow):
             
             self.canvas.draw_idle()
 
-        except:
-            print('Cannot update phase plot')
+        except Exception as e:
+            print('Cannot update phase plot',e)
 
+    def toggle_monitor_plot(self):
+
+        selected = [item.text() for item in self.listWidget.selectedItems()]
+        if self.plot_monitor_pushButton.isChecked() and len(selected)>0:
+            self.xaxis1 = np.array([])
+            self.yaxes1 = [np.array([]) for i in range(len(selected))]
+            self.timer1.start()
+        elif self.plot_monitor_pushButton.isChecked()==False: 
+            self.timer1.stop()
+        elif self.plot_monitor_pushButton.isChecked() and len(selected)==0:
+            self.timer1.stop()
+            self.plot_monitor_pushButton.setChecked(False)
+            
     def update_monitor_plot(self):
         items = [item.text() for item in self.listWidget.selectedItems()]
 
         try:
             mons = np.asarray(self.phasescan.get_readings_once(items))
             self.ax1.cla()
+            self.xaxis1 = np.append(self.xaxis1,datetime.now())
+            for i,mon in enumerate(mons):
+                self.yaxes1[i] = np.append(self.yaxes1[i],mon)
+                self.ax1.plot(self.xaxis1,self.yaxes1[i])
+
+            self.fig1.subplots_adjust(left=0.1)
+            self.fig1.subplots_adjust(right=0.95)
+            self.fig1.subplots_adjust(bottom=0.22)
+            self.fig1.subplots_adjust(top=0.95)
+            self.canvas1.draw_idle()
+
+        except Exception as e:
+            print('Cannot update monitor plot',e)
+
+    def toggle_L11_plot(self):
+
+        selected = [item.text() for item in self.listWidget.selectedItems()]
+        if self.plot_monitor_pushButton.isChecked() and len(selected)>0:
+            self.timer1.start()
+        elif self.plot_monitor_pushButton.isChecked()==False: 
+            self.timer1.stop()
+        elif self.plot_monitor_pushButton.isChecked() and len(selected)==0:
+            self.timer1.stop()
+            self.plot_monitor_pushButton.setChecked(False)
+            
+
+    def update_L11_plot(self):
+        items = [item.text() for item in self.listWidget.selectedItems()]
+
+        try:
+            mons = np.asarray(self.phasescan.get_readings_once(items))
+            self.ax1.cla()
+            self.ax1.set_ylim([0.,50.])
             self.ax1.bar([i for i in range(len(mons))],height=mons)
             self.ax1.set_xticks([i for i in range(len(mons))],items,rotation = 'vertical',fontsize=6)
             self.fig1.subplots_adjust(left=0.1)
@@ -121,9 +180,10 @@ class Main(QMainWindow, Ui_MainWindow):
             self.fig1.subplots_adjust(top=0.95)
             self.canvas1.draw_idle()
 
-        except:
-            print('Cannot update monitor plot')
+        except Exception as e:
+            print('Cannot update monitor plot',e)
 
+            
     def generate_ramp_list(self):
         self.read_phases()
         numevents = self.numevents_spinBox.value()
