@@ -1,5 +1,5 @@
 from PyQt6.uic import loadUiType
-from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QDoubleSpinBox, QPlainTextEdit
+from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QSpinBox, QDoubleSpinBox, QPlainTextEdit
 from PyQt6.QtCore import Qt
 from phasescan import phasescan
 
@@ -24,8 +24,12 @@ class Main(QMainWindow, Ui_MainWindow):
 
         for checkBox in self.findChildren(QCheckBox):
             checkBox.toggled.connect(self.add_param)
-        for spinBox in self.findChildren(QDoubleSpinBox):
-            spinBox.valueChanged.connect(self.read_deltas)
+        for dspinBox in self.findChildren(QDoubleSpinBox):
+            dspinBox.valueChanged.connect(self.read_deltas)
+        for spinBox in self.findChildren(QSpinBox):
+            if spinBox.objectName().find('steps')!=-1:
+                #print(spinBox.objectName())
+                spinBox.valueChanged.connect(self.read_steps)
 
 
     def add_param(self):
@@ -49,8 +53,10 @@ class Main(QMainWindow, Ui_MainWindow):
             if self.phasescan.param_dict[key]['selected']==True:
                 self.phasescan.param_dict[key]['delta']=self.findChild(QDoubleSpinBox,'doubleSpinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
 
-    #def read_monitors(self):
-    #    for item in self.
+    def read_steps(self):
+        for key in self.phasescan.param_dict:
+            if self.phasescan.param_dict[key]['selected']==True:
+                self.phasescan.param_dict[key]['steps']=self.findChild(QSpinBox,'steps_spinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
                     
     def select_all(self):
         for checkBox in self.findChildren(QCheckBox):
@@ -102,7 +108,6 @@ class Main(QMainWindow, Ui_MainWindow):
     def generate_ramp_list(self):
         self.read_phases()
         numevents = self.numevents_spinBox.value()
-        steps = self.steps_spinBox.value()
         if self.oneD_radioButton.isChecked():
             try:
                 self.ramplist = self.phasescan.make_ramp_list(self.phasescan.param_dict,numevents)
@@ -110,7 +115,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 print('Cannot generate 1-D ramp list.')
         elif self.nD_radioButton.isChecked():
            try:
-               self.ramplist = self.phasescan.make_loop_ramp_list(self.phasescan.param_dict,steps,numevents)
+               self.ramplist = self.phasescan.make_loop_ramp_list(self.phasescan.param_dict,numevents)
            except:
                print('Cannot generate nested ramp list.')
                

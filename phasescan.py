@@ -38,13 +38,13 @@ async def read_once(con,drf_list):
 class phasescan:
     def __init__(self):
         self.paramlist = ['Z:CUBE_X','Z:CUBE_Y','Z:CUBE_Z']
-        self.param_dict = {'RFQ':{'device':'L:RFQPAH','idx':1,'selected':False,'phase':0,'delta':0},
-                           'RFB':{'device':'L:RFBPAH','idx':2,'selected':False,'phase':0,'delta':0},
-                           'Tank 1':{'device':'L:V1QSET','idx':3,'selected':False,'phase':0,'delta':0},
-                           'Tank 2':{'device':'L:V2QSET','idx':4,'selected':False,'phase':0,'delta':0},
-                           'Tank 3':{'device':'L:V3QSET','idx':5,'selected':False,'phase':0,'delta':0},
-                           'Tank 4':{'device':'L:V4QSET','idx':6,'selected':False,'phase':0,'delta':0},
-                           'Tank 5':{'device':'L:V5QSET','idx':7,'selected':False,'phase':0,'delta':0}}
+        self.param_dict = {'RFQ':{'device':'L:RFQPAH','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
+                           'RFB':{'device':'L:RFBPAH','idx':2,'selected':False,'phase':0,'delta':0,'steps':2},
+                           'Tank 1':{'device':'L:V1QSET','idx':3,'selected':False,'phase':0,'delta':0,'steps':2},
+                           'Tank 2':{'device':'L:V2QSET','idx':4,'selected':False,'phase':0,'delta':0,'steps':2},
+                           'Tank 3':{'device':'L:V3QSET','idx':5,'selected':False,'phase':0,'delta':0,'steps':2},
+                           'Tank 4':{'device':'L:V4QSET','idx':6,'selected':False,'phase':0,'delta':0,'steps':2},
+                           'Tank 5':{'device':'L:V5QSET','idx':7,'selected':False,'phase':0,'delta':0,'steps':2}}
         
     def build_set_device_list(self,devlist):
         drf_list=[]
@@ -93,28 +93,28 @@ class phasescan:
         ramplist[0][0]='0'
         return ramplist
 
-    def make_loop_ramp_list(self,param_dict,steps,numevents):
+    def make_loop_ramp_list(self,param_dict,numevents):
         limits = []
         for dev in param_dict:
             if param_dict[dev]['selected']==True:
-                limits.append([dev,param_dict[dev]['phase'],param_dict[dev]['delta'],steps])
+                limits.append([dev,param_dict[dev]['phase'],param_dict[dev]['delta'],param_dict[dev]['steps']])
         print(limits)
 
         ramplist = []
         par = [None]*len(limits)
-        self.do_loop(len(limits),limits,steps,numevents,par,ramplist)
+        self.do_loop(len(limits),limits,numevents,par,ramplist)
 
         ramplist[0][0] = '0'
         return ramplist
         
-    def do_loop(self,N,limits,steps,numevents,par,ramplist):
+    def do_loop(self,N,limits,numevents,par,ramplist):
 
         if N==0:
             return
         else:
-            for i in range(int(steps+1)):
+            for i in range(int(limits[N-1][3]+1)):
                 par[N-1] = limits[N-1][1] - limits[N-1][2] + i*(2*limits[N-1][2]/limits[N-1][3])
-                self.do_loop(N-1,limits,steps,numevents,par,ramplist)
+                self.do_loop(N-1,limits,numevents,par,ramplist)
 
                 line = [1]
                 if (N==1):

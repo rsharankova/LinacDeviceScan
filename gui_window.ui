@@ -78,23 +78,6 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="2">
-      <widget class="QSpinBox" name="steps_spinBox">
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2" alignment="Qt::AlignHCenter">
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>Steps</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="gridLayoutWidget_2">
@@ -102,7 +85,7 @@
      <rect>
       <x>50</x>
       <y>270</y>
-      <width>190</width>
+      <width>281</width>
       <height>304</height>
      </rect>
     </property>
@@ -111,6 +94,20 @@
       <widget class="QPushButton" name="clearall_pushButton">
        <property name="text">
         <string>Clear all</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
+       <property name="singleStep">
+        <double>0.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
+       <property name="singleStep">
+        <double>0.500000000000000</double>
        </property>
       </widget>
      </item>
@@ -128,20 +125,6 @@
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
-       <property name="singleStep">
-        <double>0.500000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
-       <property name="singleStep">
-        <double>0.500000000000000</double>
        </property>
       </widget>
      </item>
@@ -236,6 +219,83 @@
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Steps</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QSpinBox" name="steps_spinBox_1">
+       <property name="minimum">
+        <number>2</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QSpinBox" name="steps_spinBox_2">
+       <property name="minimum">
+        <number>2</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="2">
+      <widget class="QSpinBox" name="steps_spinBox_3">
+       <property name="minimum">
+        <number>2</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="2">
+      <widget class="QSpinBox" name="steps_spinBox_4">
+       <property name="minimum">
+        <number>2</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="2">
+      <widget class="QSpinBox" name="steps_spinBox_5">
+       <property name="minimum">
+        <number>2</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="2">
+      <widget class="QSpinBox" name="steps_spinBox_6">
+       <property name="minimum">
+        <number>2</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="2">
+      <widget class="QSpinBox" name="steps_spinBox_7">
+       <property name="minimum">
+        <number>2</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
        </property>
       </widget>
      </item>
@@ -495,35 +555,44 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <tabstops>
-  <tabstop>clearall_pushButton</tabstop>
-  <tabstop>numevents_spinBox</tabstop>
   <tabstop>plot_phases_pushButton</tabstop>
-  <tabstop>event_comboBox</tabstop>
-  <tabstop>selectall_pushButton</tabstop>
-  <tabstop>read_monitor_pushButton</tabstop>
-  <tabstop>checkBox_1</tabstop>
-  <tabstop>doubleSpinBox_1</tabstop>
-  <tabstop>checkBox_2</tabstop>
-  <tabstop>doubleSpinBox_2</tabstop>
-  <tabstop>checkBox_3</tabstop>
-  <tabstop>doubleSpinBox_3</tabstop>
-  <tabstop>checkBox_4</tabstop>
-  <tabstop>doubleSpinBox_4</tabstop>
-  <tabstop>checkBox_5</tabstop>
-  <tabstop>doubleSpinBox_5</tabstop>
-  <tabstop>checkBox_6</tabstop>
-  <tabstop>doubleSpinBox_6</tabstop>
-  <tabstop>checkBox_7</tabstop>
-  <tabstop>doubleSpinBox_7</tabstop>
   <tabstop>listWidget</tabstop>
-  <tabstop>displayList_pushButton</tabstop>
+  <tabstop>read_monitor_pushButton</tabstop>
+  <tabstop>selectall_pushButton</tabstop>
+  <tabstop>clearall_pushButton</tabstop>
+  <tabstop>checkBox_1</tabstop>
+  <tabstop>checkBox_2</tabstop>
+  <tabstop>checkBox_3</tabstop>
+  <tabstop>checkBox_4</tabstop>
+  <tabstop>checkBox_5</tabstop>
+  <tabstop>checkBox_6</tabstop>
+  <tabstop>checkBox_7</tabstop>
+  <tabstop>doubleSpinBox_1</tabstop>
+  <tabstop>doubleSpinBox_2</tabstop>
+  <tabstop>doubleSpinBox_3</tabstop>
+  <tabstop>doubleSpinBox_4</tabstop>
+  <tabstop>doubleSpinBox_5</tabstop>
+  <tabstop>doubleSpinBox_6</tabstop>
+  <tabstop>doubleSpinBox_7</tabstop>
+  <tabstop>steps_spinBox_1</tabstop>
+  <tabstop>steps_spinBox_2</tabstop>
+  <tabstop>steps_spinBox_3</tabstop>
+  <tabstop>steps_spinBox_4</tabstop>
+  <tabstop>steps_spinBox_5</tabstop>
+  <tabstop>steps_spinBox_6</tabstop>
+  <tabstop>steps_spinBox_7</tabstop>
+  <tabstop>oneD_radioButton</tabstop>
+  <tabstop>nD_radioButton</tabstop>
+  <tabstop>event_comboBox</tabstop>
+  <tabstop>numevents_spinBox</tabstop>
   <tabstop>genList_pushButton</tabstop>
+  <tabstop>displayList_pushButton</tabstop>
   <tabstop>writeList_pushButton</tabstop>
+  <tabstop>list_plainTextEdit</tabstop>
   <tabstop>scan_pushButton</tabstop>
   <tabstop>displayScan_pushButton</tabstop>
   <tabstop>writeScan_pushButton</tabstop>
   <tabstop>scan_plainTextEdit</tabstop>
-  <tabstop>list_plainTextEdit</tabstop>
  </tabstops>
  <resources/>
  <connections>
