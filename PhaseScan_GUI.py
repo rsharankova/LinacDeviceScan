@@ -4,6 +4,7 @@ from PyQt6.QtCore import Qt
 from phasescan import phasescan
 
 import numpy as np
+from datetime import datetime,timedelta
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import (
@@ -20,7 +21,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.scanresults = []
         self.phasescan = phasescan()
         self.init_plot()
-        self.event_comboBox.addItems(['0a','52','53'])
+        self.event_comboBox.addItems(['0a','52','53','15Hz'])
 
         for checkBox in self.findChildren(QCheckBox):
             checkBox.toggled.connect(self.add_param)
@@ -28,7 +29,6 @@ class Main(QMainWindow, Ui_MainWindow):
             dspinBox.valueChanged.connect(self.read_deltas)
         for spinBox in self.findChildren(QSpinBox):
             if spinBox.objectName().find('steps')!=-1:
-                #print(spinBox.objectName())
                 spinBox.valueChanged.connect(self.read_steps)
 
 
@@ -70,9 +70,15 @@ class Main(QMainWindow, Ui_MainWindow):
     def init_plot(self):
         self.fig = Figure()
         self.ax = self.fig.add_subplot(111)
+        self.xaxis = np.array([])
+        self.yaxis = np.array([])
         self.canvas = FigureCanvas(self.fig)
         self.phases_verticalLayout.addWidget(self.canvas)
 
+        self.timer = self.canvas.new_timer(200)
+        #self.timer.add_callback(self.update_phase_plot)
+        #self.timer.start()
+        
         self.fig1 = Figure()
         self.ax1 = self.fig1.add_subplot(111)
         self.canvas1 = FigureCanvas(self.fig1)
@@ -80,13 +86,22 @@ class Main(QMainWindow, Ui_MainWindow):
 
         
     def update_phase_plot(self):
-        self.read_phases()
+
         try:
-            self.ax.cla()
+            self.read_phases()
             phases = [ self.phasescan.param_dict[key]['phase'] for key in self.phasescan.param_dict if self.phasescan.param_dict[key]['selected']==True]
+            #self.xaxis = np.appen(self.xaxis,datetime.now())
+            #self.yaxis = np.append(self.yaxis,phases[0])
+            self.ax.cla()
+            #seld.ax.plot(self.xaxis,self.yaxis)
             self.ax.barh([i for i in range(len(phases))],phases)
             self.ax.set_xlabel('Phase set (deg)')
-            self.ax.set_yticks([i for i in range(len(phases))],[ key for key in self.phasescan.param_dict if self.phasescan.param_dict[key]['selected']==True])
+            self.ax.set_yticks([i for i in range(len(phases))],[ key for key in self.phasescan.param_dict if self.phasescan.param_dict[key]['selected']==True],fontsize=8)
+            self.fig.subplots_adjust(left=0.13)
+            self.fig.subplots_adjust(right=0.95)
+            self.fig.subplots_adjust(bottom=0.12)
+            self.fig.subplots_adjust(top=0.95)
+            
             self.canvas.draw_idle()
 
         except:
@@ -94,12 +109,16 @@ class Main(QMainWindow, Ui_MainWindow):
 
     def update_monitor_plot(self):
         items = [item.text() for item in self.listWidget.selectedItems()]
-        items.sort()
-        mons = np.asarray(self.phasescan.get_readings_once(items))
+
         try:
+            mons = np.asarray(self.phasescan.get_readings_once(items))
             self.ax1.cla()
             self.ax1.bar([i for i in range(len(mons))],height=mons)
-            self.ax1.set_xticks([i for i in range(len(mons))],items)
+            self.ax1.set_xticks([i for i in range(len(mons))],items,rotation = 'vertical',fontsize=6)
+            self.fig1.subplots_adjust(left=0.1)
+            self.fig1.subplots_adjust(right=0.95)
+            self.fig1.subplots_adjust(bottom=0.22)
+            self.fig1.subplots_adjust(top=0.95)
             self.canvas1.draw_idle()
 
         except:

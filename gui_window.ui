@@ -83,9 +83,9 @@
    <widget class="QWidget" name="gridLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>40</x>
       <y>270</y>
-      <width>281</width>
+      <width>291</width>
       <height>304</height>
      </rect>
     </property>
@@ -304,9 +304,9 @@
    <widget class="QWidget" name="gridLayoutWidget_3">
     <property name="geometry">
      <rect>
-      <x>350</x>
+      <x>400</x>
       <y>430</y>
-      <width>651</width>
+      <width>601</width>
       <height>131</height>
      </rect>
     </property>
@@ -419,9 +419,28 @@
      </item>
      <item>
       <widget class="QListWidget" name="listWidget">
+       <property name="tabKeyNavigation">
+        <bool>true</bool>
+       </property>
+       <property name="showDropIndicator" stdset="0">
+        <bool>false</bool>
+       </property>
+       <property name="dragEnabled">
+        <bool>false</bool>
+       </property>
        <property name="selectionMode">
         <enum>QAbstractItemView::MultiSelection</enum>
        </property>
+       <item>
+        <property name="text">
+         <string>L:ATOR</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:BTOR</string>
+        </property>
+       </item>
        <item>
         <property name="text">
          <string>L:TO1IN</string>
@@ -434,7 +453,47 @@
        </item>
        <item>
         <property name="text">
+         <string>L:TO4IN</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:TO4OUT</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>L:TO5OUT</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D0TOR</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D1TOR</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D2TOR</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D3TOR</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D4TOR</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D5TOR</string>
         </property>
        </item>
        <item>
@@ -444,7 +503,192 @@
        </item>
        <item>
         <property name="text">
+         <string>L:D00LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D0VLM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D11LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D12LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D13LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D14LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D21LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D22LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D23LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D24LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D31LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D32LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D33LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D34LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D41LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D42LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D43LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D44LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D51LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D52LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D53LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D54LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D61LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D62LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D63LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D64LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D71LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D72LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D73LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:D74LM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:DELM1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:DELM2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:DELM3</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:DELM4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>L:D7LMSM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:TUNRAD</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:TK1RAD</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:TK4RAD</string>
         </property>
        </item>
        <item>
@@ -493,8 +737,8 @@
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>360</x>
-      <y>290</y>
+      <x>390</x>
+      <y>280</y>
       <width>111</width>
       <height>111</height>
      </rect>

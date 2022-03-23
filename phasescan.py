@@ -9,7 +9,8 @@ async def apply_settings(con,device_list,value_list,settings_role):
             await dpm.add_entry(i, value+'@i')
         await dpm.start()
         async for reply in dpm.replies():
-            settings[reply.tag]= reply.data + value_list[reply.tag]
+            if reply.isReadingFor(*list(range(0, len(device_list)))):
+                settings[reply.tag]= reply.data + value_list[reply.tag]
             if settings.count(None)==0:
                 break
 
