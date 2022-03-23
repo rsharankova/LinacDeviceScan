@@ -791,6 +791,19 @@
      </layout>
     </widget>
    </widget>
+   <widget class="QPushButton" name="expand1_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>0</y>
+      <width>113</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Expand</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -1006,6 +1019,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>expand1_pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>expand()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>216</x>
+     <y>39</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>541</x>
+     <y>322</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>toggle_phase_plot()</slot>
@@ -1019,5 +1048,6 @@
   <slot>scan()</slot>
   <slot>write_scan_results()</slot>
   <slot>display_scan_results()</slot>
+  <slot>expand()</slot>
  </slots>
 </ui>

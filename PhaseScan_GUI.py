@@ -1,5 +1,5 @@
-from PyQt6.uic import loadUiType
-from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QSpinBox, QDoubleSpinBox, QPlainTextEdit
+from PyQt6.uic import loadUiType, loadUi
+from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QSpinBox, QDoubleSpinBox, QPlainTextEdit, QDialog
 from PyQt6.QtCore import Qt
 from phasescan import phasescan
 
@@ -238,6 +238,32 @@ class Main(QMainWindow, Ui_MainWindow):
         except:
             print('Something went wrong')
 
+
+    def expand(self):
+        """Launch the employee dialog."""
+        dlg = ExpandPlot(self)
+        dlg.exec()
+            
+            
+class ExpandPlot(QDialog):
+    """Expand plot."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        loadUi("expandPlot.ui", self)
+        self.init_plot()
+
+    def init_plot(self):
+        #self.fig = Figure()
+        self.fig = self.parent().fig
+        #self.ax = self.fig.add_subplot(111)
+        self.ax = self.parent().ax
+        self.canvas = FigureCanvas(self.fig)
+        self.verticalLayout.addWidget(self.canvas)
+
+        self.timer = self.parent().timer
+        #self.timer = self.canvas.new_timer(200)
+        #self.timer.add_callback(self.parent().update_phase_plot)
+    
             
 if __name__ == '__main__':
     import sys
