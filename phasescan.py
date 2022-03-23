@@ -112,7 +112,8 @@ class phasescan:
         if N==0:
             return
         else:
-            for i in range(int(limits[N-1][3]+1)):
+            steps = 0 if limits[N-1][2]==0 else limits[N-1][3]
+            for i in range(int(steps+1)):
                 par[N-1] = limits[N-1][1] - limits[N-1][2] + i*(2*limits[N-1][2]/limits[N-1][3])
                 self.do_loop(N-1,limits,numevents,par,ramplist)
 
