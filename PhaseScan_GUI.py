@@ -1,6 +1,6 @@
 from PyQt6.uic import loadUiType, loadUi
 from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QSpinBox, QDoubleSpinBox, QPlainTextEdit, QDialog
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QUuid
 from phasescan import phasescan
 
 import numpy as np
@@ -139,6 +139,7 @@ class Main(QMainWindow, Ui_MainWindow):
         dlg.show()
         
     def barTors(self):
+
         selected = [self.listWidget.item(i).text() for i in range(self.listWidget.count()) if self.listWidget.item(i).text().find('TO')!=-1]
         dlg = BarPlot(selected,self)
         dlg.show()
@@ -148,6 +149,9 @@ class TimePlot(QDialog):
     def __init__(self, selected,parent=None):
         super().__init__(parent)
         loadUi("expandPlot.ui", self)
+
+        self.thread = QUuid.createUuid().toString()
+        #print(self.thread)
         self.selected = selected
         self.init_plot()
 
@@ -166,17 +170,21 @@ class TimePlot(QDialog):
             self.xaxis = np.array([])
             self.yaxes = [np.array([]) for i in range(len(self.selected))]
             self.timer.start()
+            self.parent().phasescan.start_thread('%s'%self.thread,self.selected)
         elif self.plot_pushButton.isChecked()==False: 
             self.timer.stop()
+            self.parent().phasescan.stop_thread('%s'%self.thread)
         elif self.plot_pushButton.isChecked() and len(self.selected)==0:
             self.timer.stop()
+            self.parent().phasescan.stop_thread('%s'%self.thread)
             self.plot_pushButton.setChecked(False)
             
     def update_plot(self):
         try:
             self.ax.cla()
             self.xaxis = np.append(self.xaxis,datetime.now())
-            data = np.asarray(self.parent().phasescan.get_readings_once(self.selected))
+            #data = np.asarray(self.parent().phasescan.get_readings_once(self.selected))
+            data = self.parent().phasescan.get_thread_data('%s'%self.thread)
             for i,d in enumerate(data):
                 self.yaxes[i] = np.append(self.yaxes[i],d)
                 self.ax.plot(self.xaxis,self.yaxes[i])
@@ -196,6 +204,8 @@ class BarPlot(QDialog):
     def __init__(self, selected, parent=None):
         super().__init__(parent)
         loadUi("expandPlot.ui", self)
+
+        self.thread = QUuid.createUuid().toString()
         self.selected = selected
         self.init_plot()
 
@@ -212,15 +222,19 @@ class BarPlot(QDialog):
     def toggle_plot(self):
         if self.plot_pushButton.isChecked() and len(self.selected)>0:
             self.timer.start()
+            self.parent().phasescan.start_thread('%s'%self.thread,self.selected)
         elif self.plot_pushButton.isChecked()==False: 
             self.timer.stop()
+            self.parent().phasescan.stop_thread('%s'%self.thread)
         elif self.plot_pushButton.isChecked() and len(self.selected)==0:
             self.timer.stop()
+            self.parent().phasescan.stop_thread('%s'%self.thread)
             self.plot_pushButton.setChecked(False)
             
     def update_plot(self):
         try:
-            data = np.asarray(self.parent().phasescan.get_readings_once(self.selected))
+            #data = np.asarray(self.parent().phasescan.get_readings_once(self.selected))
+            data = self.parent().phasescan.get_thread_data('%s'%self.thread)
             self.ax.cla()
             self.ax.set_ylim([0.,max(data)])
             self.ax.bar([i for i in range(len(data))],height=data)

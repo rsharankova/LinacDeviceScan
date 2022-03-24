@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1037</width>
-    <height>422</height>
+    <width>1012</width>
+    <height>490</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,11 +26,14 @@
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
       <widget class="QLabel" name="label_1">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Event</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -39,11 +42,14 @@
      </item>
      <item>
       <widget class="QLabel" name="label_2">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Measurements</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -64,15 +70,15 @@
      <rect>
       <x>40</x>
       <y>30</y>
-      <width>305</width>
-      <height>304</height>
+      <width>307</width>
+      <height>332</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="1">
-      <widget class="QPushButton" name="clearall_pushButton">
+     <item row="0" column="2">
+      <widget class="QPushButton" name="expand_pushButton_1">
        <property name="text">
-        <string>Clear all</string>
+        <string>Plot phases</string>
        </property>
       </widget>
      </item>
@@ -83,8 +89,22 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="clearall_pushButton">
+       <property name="text">
+        <string>Clear all</string>
+       </property>
+      </widget>
+     </item>
      <item row="7" column="1">
       <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
+       <property name="singleStep">
+        <double>0.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
        <property name="singleStep">
         <double>0.500000000000000</double>
        </property>
@@ -99,18 +119,14 @@
      </item>
      <item row="1" column="1">
       <widget class="QLabel" name="label">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Delta (deg)</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
-       <property name="singleStep">
-        <double>0.500000000000000</double>
        </property>
       </widget>
      </item>
@@ -179,6 +195,12 @@
      </item>
      <item row="3" column="0">
       <widget class="QCheckBox" name="checkBox_2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>RFB</string>
        </property>
@@ -186,6 +208,12 @@
      </item>
      <item row="2" column="0">
       <widget class="QCheckBox" name="checkBox_1">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>RFQ</string>
        </property>
@@ -193,6 +221,9 @@
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_3">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Phase set</string>
        </property>
@@ -203,8 +234,14 @@
      </item>
      <item row="1" column="2">
       <widget class="QLabel" name="label_6">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Steps</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -278,13 +315,6 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QPushButton" name="expand_pushButton_1">
-       <property name="text">
-        <string>Plot phases</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="gridLayoutWidget_3">
@@ -293,55 +323,13 @@
       <x>400</x>
       <y>240</y>
       <width>581</width>
-      <height>91</height>
+      <height>116</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
-     <item row="0" column="1">
-      <widget class="QPushButton" name="displayList_pushButton">
-       <property name="text">
-        <string>Display list</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QPushButton" name="genList_pushButton">
-       <property name="text">
-        <string>Make ramp list</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QPushButton" name="writeList_pushButton">
-       <property name="text">
-        <string>Write csv</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QPushButton" name="scan_pushButton">
-       <property name="text">
-        <string>Scan devices</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QPushButton" name="displayScan_pushButton">
-       <property name="text">
-        <string>Display scan</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="QPushButton" name="writeScan_pushButton">
-       <property name="text">
-        <string>Write csv</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="3">
       <widget class="QPlainTextEdit" name="scan_plainTextEdit">
        <property name="sizePolicy">
@@ -355,6 +343,41 @@
          <width>150</width>
          <height>30</height>
         </size>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="displayList_pushButton">
+       <property name="text">
+        <string>Display list</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QPushButton" name="writeScan_pushButton">
+       <property name="text">
+        <string>Write csv</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="displayScan_pushButton">
+       <property name="text">
+        <string>Display scan</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="scan_pushButton">
+       <property name="text">
+        <string>Scan devices</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="writeList_pushButton">
+       <property name="text">
+        <string>Write csv</string>
        </property>
       </widget>
      </item>
@@ -374,6 +397,13 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="0">
+      <widget class="QPushButton" name="genList_pushButton">
+       <property name="text">
+        <string>Make ramp list</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
    <widget class="QWidget" name="verticalLayoutWidget_2">
@@ -388,6 +418,9 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QLabel" name="label_4">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Select monitor devices</string>
        </property>
@@ -691,6 +724,14 @@
       <height>111</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Scan type</string>
     </property>
@@ -766,13 +807,55 @@
      </item>
     </layout>
    </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>370</y>
+      <width>121</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Dummy scan?</string>
+    </property>
+    <widget class="QRadioButton" name="dummy_radioButton_yes">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>30</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Yes</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="dummy_radioButton_no">
+     <property name="geometry">
+      <rect>
+       <x>70</x>
+       <y>30</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>No</string>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1037</width>
+     <width>1012</width>
      <height>24</height>
     </rect>
    </property>

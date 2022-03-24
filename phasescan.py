@@ -1,5 +1,8 @@
 import numpy as np
 import acsys.dpm
+import threading
+import asyncio
+import time
 
 async def apply_settings(con,device_list,value_list,settings_role):
     settings = [None]*len(device_list)
@@ -38,6 +41,8 @@ async def read_once(con,drf_list):
 
 class phasescan:
     def __init__(self):
+        self.thread_dict = {}
+        self.thread_lock=threading.Lock()
         self.paramlist = ['Z:CUBE_X','Z:CUBE_Y','Z:CUBE_Z']
         self.param_dict = {'RFQ':{'device':'L:RFQPAH','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
                            'RFB':{'device':'L:RFBPAH','idx':2,'selected':False,'phase':0,'delta':0,'steps':2},
@@ -47,6 +52,45 @@ class phasescan:
                            'Tank 4':{'device':'L:V4QSET','idx':6,'selected':False,'phase':0,'delta':0,'steps':2},
                            'Tank 5':{'device':'L:V5QSET','idx':7,'selected':False,'phase':0,'delta':0,'steps':2}}
         
+    def acnet_daq(self,thread_name):
+        thread_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(thread_loop)
+        print("Starting thread ",thread_name)
+        print(self.thread_dict[thread_name])
+        while(self.thread_dict[thread_name]['run_daq']):
+            try:
+                data=self.get_readings_once(self.thread_dict[thread_name]['paramlist'])    
+            except:
+                print("Acnet error ",thread_name)
+            self.thread_lock.acquire()
+            self.thread_dict[thread_name]['data']=data
+            self.thread_lock.release()
+
+        thread_loop.close()
+        print("Stopping thread ",thread_name)
+        
+    def get_thread_data(self,thread_name):
+        self.thread_lock.acquire()
+        data=self.thread_dict[thread_name]['data']
+        self.thread_lock.release()
+        return data
+    
+    def start_thread(self,thread_name,paramlist):
+        daqthread = threading.Thread(target=self.acnet_daq, args=(thread_name,))
+        self.thread_dict[thread_name]={'run_daq':True, 'thread': daqthread, 'data':[], 'paramlist':paramlist}
+        daqthread.start()
+
+    def stop_thread(self,thread_name):
+        self.thread_dict[thread_name]['run_daq']=False
+        self.thread_dict[thread_name]['thread'].join()
+
+    def stop_all_threads(self):
+        for t in self.thread_dict:
+            self.stop_thread(t)
+
+    def get_list_of_threads(self):
+        return self.thread_dict.keys()
+    
     def build_set_device_list(self,devlist):
         drf_list=[]
         for dev in devlist:
