@@ -140,14 +140,14 @@ class Main(QMainWindow, Ui_MainWindow):
         evt = self.event_comboBox.currentText()
         selected = [self.listWidget.item(i).text() for i in range(self.listWidget.count()) if self.listWidget.item(i).text().find('LM')!=-1]
         selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in selected]
-        dlg = BarPlot(selected,self)
+        dlg = BarPlot(selected,evt,self)
         dlg.show()
         
     def barTors(self):
         evt = self.event_comboBox.currentText()
         selected = [self.listWidget.item(i).text() for i in range(self.listWidget.count()) if self.listWidget.item(i).text().find('TO')!=-1]
         selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in selected]
-        dlg = BarPlot(selected,self)
+        dlg = BarPlot(selected,evt,self)
         dlg.show()
 
             
@@ -241,12 +241,12 @@ class BarPlot(QDialog):
             
     def update_plot(self):
         try:
-            #data = np.asarray(self.parent().phasescan.get_readings_once(self.selected))
             data = self.parent().phasescan.get_thread_data('%s'%self.thread)
             self.ax.cla()
-            self.ax.set_ylim([0.,max(data)])
+            #self.ax.set_ylim([0.,max(data)])
             self.ax.bar([i for i in range(len(data))],height=data)
-            self.ax.set_xticks([i for i in range(len(data))],self.selected,rotation = 'vertical',fontsize=6)
+            labels = [s.split('@')[0] for s in self.selected]
+            self.ax.set_xticks([i for i in range(len(data))],labels,rotation = 'vertical',fontsize=6)
 
             self.fig.subplots_adjust(left=0.1)
             self.fig.subplots_adjust(right=0.95)
