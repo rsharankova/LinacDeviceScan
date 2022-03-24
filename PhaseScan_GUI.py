@@ -104,6 +104,20 @@ class Main(QMainWindow, Ui_MainWindow):
         numevents = self.numevents_spinBox.value()
         evt = self.event_comboBox.currentText()
         print('Evt: ',evt, self.evt_dict[evt])
+        if self.cube_groupBox.isChecked():
+            print('Debug mode')
+            names = [self.findChild(QCheckBox,'cube_checkBox_%d'%i) for i in range(1,4)]
+            deltas = [self.findChild(QDoubleSpinBox,'cube_doubleSpinBox_%d'%i) for i in range(1,4)]
+            steps = [self.findChild(QSpinBox,'cube_spinBox_%d'%i) for i in range(1,4)]
+            idx=[i for i,n in enumerate(names) if n.isChecked()]
+            paramlist = [names[i].text() for i in idx]
+            deltas = [deltas[i].value() for i in idx]
+            steps = [steps[i].value() for i in idx]
+
+            setpoints = self.phasescan.get_settings_once(paramlist)
+
+            print(paramlist,deltas,steps, setpoints)
+            self.phasescan.apply_settings_once(paramlist,deltas)   
 
     def display_scan_results(self):
         for line in self.scanresults:

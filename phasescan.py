@@ -2,15 +2,15 @@ import acsys.dpm
 import threading
 import asyncio
 
-async def apply_settings(con,device_list,value_list,settings_role):
-    settings = [None]*len(device_list)
+async def apply_settings(con,drf_list,value_list,settings_role):
+    settings = [None]*len(drf_list)
     async with acsys.dpm.DPMContext(con) as dpm:
         await dpm.enable_settings(role=settings_role)
-        for i, value in enumerate(device_list):
-            await dpm.add_entry(i, value+'@i')
+        for i, dev in enumerate(drf_list):
+            await dpm.add_entry(i, dev+'@i')
         await dpm.start()
         async for reply in dpm.replies():
-            if reply.isReadingFor(*list(range(0, len(device_list)))):
+            if reply.isReadingFor(*list(range(0, len(drf_list)))):
                 settings[reply.tag]= reply.data + value_list[reply.tag]
             if settings.count(None)==0:
                 break
@@ -19,9 +19,9 @@ async def apply_settings(con,device_list,value_list,settings_role):
         print(setpairs)
         await dpm.apply_settings(setpairs)
         print('settings applied')
-        async for reply in dpm.replies(tmo=0.25):
-            print(reply)
-            break
+        #async for reply in dpm.replies(tmo=0.25):
+        #    print(reply)
+        #    break
     return None
 
 async def read_once(con,drf_list):
@@ -136,6 +136,15 @@ class phasescan:
         phases= acsys.run_client(read_once, drf_list=drf_list) 
         return phases
 
+    def apply_settings_once(self,paramlist,values):
+        if paramlist and len(paramlist)!=0:
+            drf_list = self.build_set_device_list(paramlist)
+        else:
+            print('Device list empty. Reading dummy devices')
+            drf_list = self.build_set_device_list(self.paramlist)
+        print(drf_list)
+        acsys.run_client(apply_settings, drf_list=drf_list, value_list=values,settings_role='testing') 
+    
     
     def make_ramp_list(self,param_dict,numevents):
         tmplist = []

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1012</width>
-    <height>490</height>
+    <width>1014</width>
+    <height>581</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -470,6 +470,21 @@
        </property>
        <item>
         <property name="text">
+         <string>Z:CUBE_X</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Z:CUBE_Y</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Z:CUBE_Z</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>L:ATOR</string>
         </property>
        </item>
@@ -829,46 +844,86 @@
      </item>
     </layout>
    </widget>
-   <widget class="QGroupBox" name="groupBox_2">
+   <widget class="QGroupBox" name="cube_groupBox">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>370</y>
-      <width>121</width>
-      <height>61</height>
+      <x>360</x>
+      <y>380</y>
+      <width>381</width>
+      <height>141</height>
      </rect>
     </property>
     <property name="title">
-     <string>Dummy scan?</string>
+     <string>Debug mode</string>
     </property>
-    <widget class="QRadioButton" name="dummy_radioButton_yes">
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+    <widget class="QWidget" name="gridLayoutWidget_4">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>20</x>
        <y>30</y>
-       <width>51</width>
-       <height>20</height>
+       <width>351</width>
+       <height>99</height>
       </rect>
      </property>
-     <property name="text">
-      <string>Yes</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="dummy_radioButton_no">
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>30</y>
-       <width>51</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>No</string>
-     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="cube_checkBox_2">
+        <property name="text">
+         <string>Z:CUBE_Y</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="cube_doubleSpinBox_1"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="cube_checkBox_3">
+        <property name="text">
+         <string>Z:CUBE_Z</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="cube_checkBox_1">
+        <property name="text">
+         <string>Z:CUBE_X</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="cube_doubleSpinBox_3"/>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="cube_doubleSpinBox_2"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QSpinBox" name="cube_spinBox_1">
+        <property name="minimum">
+         <number>2</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QSpinBox" name="cube_spinBox_2">
+        <property name="minimum">
+         <number>2</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QSpinBox" name="cube_spinBox_3">
+        <property name="minimum">
+         <number>2</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </widget>
   </widget>
@@ -877,7 +932,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1012</width>
+     <width>1014</width>
      <height>24</height>
     </rect>
    </property>
