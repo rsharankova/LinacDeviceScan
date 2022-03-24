@@ -38,7 +38,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="event_comboBox"/>
+      <widget class="QComboBox" name="event_comboBox">
+       <property name="currentIndex">
+        <number>-1</number>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="label_2">
@@ -119,6 +123,12 @@
      </item>
      <item row="1" column="1">
       <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="autoFillBackground">
         <bool>false</bool>
        </property>
@@ -221,6 +231,12 @@
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_3">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="autoFillBackground">
         <bool>false</bool>
        </property>
@@ -234,6 +250,12 @@
      </item>
      <item row="1" column="2">
       <widget class="QLabel" name="label_6">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="autoFillBackground">
         <bool>false</bool>
        </property>

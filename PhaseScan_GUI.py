@@ -20,8 +20,9 @@ class Main(QMainWindow, Ui_MainWindow):
         self.ramplist = []
         self.scanresults = []
         self.phasescan = phasescan()
-        self.event_comboBox.addItems(['0a','52','53','15Hz'])
-
+        self.event_comboBox.addItems(['default','15Hz','52','53','0a'])
+        self.evt_dict = {'default':'','15Hz':'@p,15000','52':'@e,52,e,0','53':'@e,53,e,0','0a':'@e,0a,e,0'}
+        
         for checkBox in self.findChildren(QCheckBox):
             checkBox.toggled.connect(self.add_param)
         for dspinBox in self.findChildren(QDoubleSpinBox):
@@ -102,7 +103,7 @@ class Main(QMainWindow, Ui_MainWindow):
     def scan(self):
         numevents = self.numevents_spinBox.value()
         evt = self.event_comboBox.currentText()
-        print('Work in porigress')
+        print('Evt: ',evt, self.evt_dict[evt])
 
     def display_scan_results(self):
         for line in self.scanresults:
@@ -123,30 +124,35 @@ class Main(QMainWindow, Ui_MainWindow):
 
 
     def expandMon(self):
-        selected = [item.text() for item in self.listWidget.selectedItems()]
-        dlg = TimePlot(selected,self)
+        evt = self.event_comboBox.currentText()
+        selected = ['%s%s'%(item.text(),self.evt_dict[evt]) for item in self.listWidget.selectedItems()]
+        dlg = TimePlot(selected,evt,self)
         dlg.show()
 
     def expandPhase(self):
+        evt = self.event_comboBox.currentText()
         selected = [ self.phasescan.param_dict[key]['device'] for key in self.phasescan.param_dict if self.phasescan.param_dict[key]['selected']==True]
-        dlg = TimePlot(selected,self)
+        selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in selected]
+        dlg = TimePlot(selected,evt,self)
         dlg.show()
 
     def barLosses(self):
-        #selected = [item.text() for i in self.listWidget.count() if self.listWidget.item(i).text().find('LM')!=-1]
+        evt = self.event_comboBox.currentText()
         selected = [self.listWidget.item(i).text() for i in range(self.listWidget.count()) if self.listWidget.item(i).text().find('LM')!=-1]
+        selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in selected]
         dlg = BarPlot(selected,self)
         dlg.show()
         
     def barTors(self):
-
+        evt = self.event_comboBox.currentText()
         selected = [self.listWidget.item(i).text() for i in range(self.listWidget.count()) if self.listWidget.item(i).text().find('TO')!=-1]
+        selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in selected]
         dlg = BarPlot(selected,self)
         dlg.show()
 
             
 class TimePlot(QDialog):
-    def __init__(self, selected,parent=None):
+    def __init__(self, selected,evt,parent=None):
         super().__init__(parent)
         loadUi("expandPlot.ui", self)
 
@@ -154,6 +160,7 @@ class TimePlot(QDialog):
         #print(self.thread)
         self.selected = selected
         self.init_plot()
+        self.label.setText('%s'%evt)
 
     def init_plot(self):
         self.fig = Figure()
@@ -161,7 +168,7 @@ class TimePlot(QDialog):
         self.canvas = FigureCanvas(self.fig)
         self.verticalLayout.addWidget(self.canvas)
 
-        self.timer = self.canvas.new_timer(200)
+        self.timer = self.canvas.new_timer(60)
         self.timer.add_callback(self.update_plot)
         
 
@@ -201,13 +208,14 @@ class TimePlot(QDialog):
             
 class BarPlot(QDialog):
     """Bar plot."""
-    def __init__(self, selected, parent=None):
+    def __init__(self, selected, evt, parent=None):
         super().__init__(parent)
         loadUi("expandPlot.ui", self)
 
         self.thread = QUuid.createUuid().toString()
         self.selected = selected
         self.init_plot()
+        self.label.setText('%s'%evt)
 
     def init_plot(self):
         self.fig = Figure()

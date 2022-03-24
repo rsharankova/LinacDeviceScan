@@ -1,8 +1,6 @@
-import numpy as np
 import acsys.dpm
 import threading
 import asyncio
-import time
 
 async def apply_settings(con,device_list,value_list,settings_role):
     settings = [None]*len(device_list)
@@ -31,13 +29,30 @@ async def read_once(con,drf_list):
     async with acsys.dpm.DPMContext(con) as dpm:
         for i in range(len(drf_list)):
             await dpm.add_entry(i, drf_list[i]+'@i')
-        await dpm.start()
+
+            await dpm.start()
+
         async for reply in dpm:
-            #print(reply)
             settings[reply.tag]=reply.data
             if settings.count(None) ==0:
                 break
     return settings
+
+async def read_many(con,dict):
+    async with acsys.dpm.DPMContext(con) as dpm:
+        await dpm.add_entries(list(enumerate(dict['paramlist'])))
+
+        await dpm.start()
+
+        async for evt_res in dpm:
+            if evt_res.isReadingFor(*list(range(0, len(dict['paramlist'])))):
+                dict['data'][evt_res.tag]=evt_res.data
+                if not dict['run_daq']:
+                        break
+            else:
+                print(f'Status: {evt_res}')
+
+        print("Ending read_many loop")
 
 class phasescan:
     def __init__(self):
@@ -57,14 +72,18 @@ class phasescan:
         asyncio.set_event_loop(thread_loop)
         print("Starting thread ",thread_name)
         print(self.thread_dict[thread_name])
-        while(self.thread_dict[thread_name]['run_daq']):
-            try:
-                data=self.get_readings_once(self.thread_dict[thread_name]['paramlist'])    
-            except:
-                print("Acnet error ",thread_name)
-            self.thread_lock.acquire()
-            self.thread_dict[thread_name]['data']=data
-            self.thread_lock.release()
+
+        #run this with read_many
+        acsys.run_client(read_many, dict=self.thread_dict[thread_name])
+        #run this with read_once
+#        while(self.thread_dict[thread_name]['run_daq']):
+#            try:
+#                data=self.get_readings_once(self.thread_dict[thread_name]['paramlist'])    
+#            except:
+#                print("Acnet error ",thread_name)
+#            self.thread_lock.acquire()
+#            self.thread_dict[thread_name]['data']=data
+#            self.thread_lock.release()
 
         thread_loop.close()
         print("Stopping thread ",thread_name)
@@ -77,7 +96,7 @@ class phasescan:
     
     def start_thread(self,thread_name,paramlist):
         daqthread = threading.Thread(target=self.acnet_daq, args=(thread_name,))
-        self.thread_dict[thread_name]={'run_daq':True, 'thread': daqthread, 'data':[], 'paramlist':paramlist}
+        self.thread_dict[thread_name]={'run_daq':True, 'thread': daqthread, 'data':[None]*len(paramlist), 'paramlist':paramlist}
         daqthread.start()
 
     def stop_thread(self,thread_name):
