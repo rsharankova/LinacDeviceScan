@@ -28,23 +28,26 @@ async def set_many(con,ramp_list,evt,settings_role):
         await dpm.enable_settings(role=settings_role)
 
         drf_list = [s for s in ramp_list[0] if str(s).find(':')!=-1]
+
         drf_list=['%s%s'%(l,evt) for l in drf_list]
         for i, dev in enumerate(drf_list):
             await dpm.add_entry(i, dev)
 
         await dpm.start()
-        await dpm.apply_settings([(1, 42),(2,42)])
         ii=0
         async for evt_res in dpm:
             if evt_res.isReadingFor(0):
                 print('0 ',evt_res)
-                await dpm.apply_settings([(1, evt_res.data + ii),(2,evt_res.data + 2*ii)])
+                vals = [n for n in ramp_list[ii] if isinstance(n,float)]
+                setpairs = list(enumerate(vals))
+                await dpm.apply_settings(setpairs[1:])
                 ii = ii+1
+
             elif evt_res.isReadingFor(*list(range(0, len(drf_list)))):
                 print('other ',evt_res)
-                
-            if ii>=5:
+            if ii>=min(5,len(ramp_list)):
                 break
+                
     return None
 
 async def read_once(con,drf_list):
@@ -291,7 +294,7 @@ class phasescan:
                 ramp[N-1] = limits[N-1][1] - limits[N-1][2] + i*(2*limits[N-1][2]/limits[N-1][3])
                 self.do_loop(N-1,limits,numevents,ramp,ramplist)
 
-                line = [1]
+                line = ['1']
                 if (N==1):
                     for j in range(len(ramp)):
                         line.append(limits[N-1+j][0])
