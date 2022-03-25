@@ -30,20 +30,22 @@ class Main(QMainWindow, Ui_MainWindow):
             checkBox.toggled.connect(self.add_param)
         for dspinBox in self.findChildren(QDoubleSpinBox):
             dspinBox.valueChanged.connect(self.read_deltas)
+
         for spinBox in self.findChildren(QSpinBox):
             if spinBox.objectName().find('steps')!=-1:
                 spinBox.valueChanged.connect(self.read_steps)
+
         self.debug_pushButton.toggled.connect(self.toggle_debug)
 
     def toggle_debug(self):
         if self.debug_pushButton.isChecked():
             self.stackedWidget.setCurrentIndex(0)
             self.phasescan.swap_dict()
-            print(self.phasescan.param_dict)
+            #print(self.phasescan.param_dict)
         else:
             self.stackedWidget.setCurrentIndex(1)
             self.phasescan.swap_dict()
-            print(self.phasescan.param_dict)
+            #print(self.phasescan.param_dict)
 
         
     def add_param(self):
@@ -70,6 +72,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 else:
                     self.phasescan.param_dict[key]['delta']=self.findChild(QDoubleSpinBox,'doubleSpinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
 
+                    
     def read_steps(self):
         for key in self.phasescan.param_dict:
             if self.phasescan.param_dict[key]['selected']==True:
@@ -77,6 +80,7 @@ class Main(QMainWindow, Ui_MainWindow):
                     self.phasescan.param_dict[key]['steps']=self.findChild(QSpinBox,'cube_steps_spinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
                 else:
                     self.phasescan.param_dict[key]['steps']=self.findChild(QSpinBox,'steps_spinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
+
                     
     def select_all(self):
         for checkBox in self.findChildren(QCheckBox):
@@ -124,11 +128,10 @@ class Main(QMainWindow, Ui_MainWindow):
         numevents = self.numevents_spinBox.value()
         evt = self.event_comboBox.currentText()
         self.read_phases()
-        print('Evt: ',evt, self.evt_dict[evt])
         if self.debug_pushButton.isChecked():
             print('Debug mode')
             print(self.phasescan.param_dict)
-            #self.phasescan.apply_settings_once(paramlist,deltas)   
+            self.phasescan.apply_settings(self.ramplist,self.evt_dict[evt])   
 
     def display_scan_results(self):
         for line in self.scanresults:

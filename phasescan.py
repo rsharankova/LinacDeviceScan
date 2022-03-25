@@ -2,7 +2,7 @@ import acsys.dpm
 import threading
 import asyncio
 
-async def apply_settings(con,drf_list,value_list,settings_role):
+async def set_once(con,drf_list,value_list,settings_role):
     settings = [None]*len(drf_list)
     async with acsys.dpm.DPMContext(con) as dpm:
         await dpm.enable_settings(role=settings_role)
@@ -19,12 +19,36 @@ async def apply_settings(con,drf_list,value_list,settings_role):
         print(setpairs)
         await dpm.apply_settings(setpairs)
         print('settings applied')
-        #async for reply in dpm.replies(tmo=0.25):
-        #    print(reply)
-        #    break
+
+    return None
+
+
+async def set_many(con,ramp_list,evt,settings_role):
+    async with acsys.dpm.DPMContext(con) as dpm:
+        await dpm.enable_settings(role=settings_role)
+
+        drf_list = [s for s in ramp_list[0] if str(s).find(':')!=-1]
+        drf_list=['%s%s'%(l,evt) for l in drf_list]
+        for i, dev in enumerate(drf_list):
+            await dpm.add_entry(i, dev)
+
+        await dpm.start()
+        await dpm.apply_settings([(1, 42),(2,42)])
+        ii=0
+        async for evt_res in dpm:
+            if evt_res.isReadingFor(0):
+                print('0 ',evt_res)
+                await dpm.apply_settings([(1, evt_res.data + ii),(2,evt_res.data + 2*ii)])
+                ii = ii+1
+            elif evt_res.isReadingFor(*list(range(0, len(drf_list)))):
+                print('other ',evt_res)
+                
+            if ii>=5:
+                break
     return None
 
 async def read_once(con,drf_list):
+
     settings = [None]*len(drf_list)
     async with acsys.dpm.DPMContext(con) as dpm:
         for i in range(len(drf_list)):
@@ -45,7 +69,6 @@ async def read_many(con,dict):
         await dpm.start()
 
         async for evt_res in dpm:
-            #if evt_res.isReadingFor(*list(range(0, len(dict['paramlist'])))):
             if isinstance(evt_res,acsys.dpm.ItemData):
                 dict['data'][evt_res.tag]=evt_res.data
                 if not dict['run_daq']:
@@ -54,6 +77,35 @@ async def read_many(con,dict):
                 print(f'Status: {evt_res}')
 
         print("Ending read_many loop")
+
+'''
+async def read_many(con, thread_context):
+    """Read many values from the DPM."""
+    async with acsys.dpm.DPMContext(con) as dpm:
+        # Add our async context to the thread context.
+        # This allows us to close the DPM context when
+        # the thread exits without a flag.
+        thread_context['daq_task'] = dpm
+
+        await dpm.add_entries(list(enumerate(thread_context['paramlist'])))
+
+        await dpm.start()
+
+        async for evt_res in dpm:
+            #if evt_res.isReading:
+            if isinstance(evt_res,acsys.dpm.ItemData):
+                # We must have a lock before we can write data, otherwise the
+                # data could be read at the same time.
+                with thread_context['lock']:
+                    thread_context['data'][evt_res.tag] = evt_res.data
+            #elif evt_res.isStatus:
+            elif isinstance(evt_res,acsys.dpm.ItemStatus):
+                print(f'Status: {evt_res}')
+            else:
+                print(f'Unknown response: {evt_res}')
+
+        print('Ending read_many loop')
+'''
 
 class phasescan:
     def __init__(self):
@@ -67,9 +119,9 @@ class phasescan:
                            'Tank 3':{'device':'L:V3QSET','idx':5,'selected':False,'phase':0,'delta':0,'steps':2},
                            'Tank 4':{'device':'L:V4QSET','idx':6,'selected':False,'phase':0,'delta':0,'steps':2},
                            'Tank 5':{'device':'L:V5QSET','idx':7,'selected':False,'phase':0,'delta':0,'steps':2}}
-        self.debug_dict={'Cube X':{'device':'Z:CUBE_X','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
-                         'Cube Y':{'device':'Z:CUBE_Y','idx':2,'selected':False,'phase':0,'delta':0,'steps':2},
-                         'Cube Z':{'device':'Z:CUBE_Z','idx':3,'selected':False,'phase':0,'delta':0,'steps':2}}
+        self.debug_dict={'Z:CUBE_X':{'device':'Z:CUBE_X','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
+                         'Z:CUBE_Y':{'device':'Z:CUBE_Y','idx':2,'selected':False,'phase':0,'delta':0,'steps':2},
+                         'Z:CUBE_Z':{'device':'Z:CUBE_Z','idx':3,'selected':False,'phase':0,'delta':0,'steps':2}}
 
         self.param_dict=self.main_dict
         
@@ -78,45 +130,75 @@ class phasescan:
             self.param_dict=self.debug_dict
         else:
             self.param_dict=self.main_dict
-        
+
+    '''
+    def _acnet_daq(self, thread_name):
+        """Run the ACNet DAQ."""
+        event_loop = asyncio.new_event_loop()
+
+        try:
+            asyncio.set_event_loop(event_loop)
+            acsys.run_client(read_many, thread_context=self.thread_dict[thread_name])
+        finally:
+            event_loop.close()
+
+    def get_thread_data(self, thread_name):
+        """Get the data from the thread."""
+        with self.thread_dict[thread_name]['lock']:
+            return self.thread_dict[thread_name]['data'].copy()
+
+    def start_thread(self, thread_name, param_list):
+        """Start the thread."""
+        print('Starting thread', thread_name)
+        daq_thread = threading.Thread(
+            target=self._acnet_daq,
+            args=(thread_name,)
+        )
+
+        self.thread_dict[thread_name] = {
+            'thread': daq_thread,
+            'lock': threading.Lock(),
+            'data': [None]*len(param_list),
+            'paramlist': param_list
+        }
+
+        daq_thread.start()
+
+    def stop_thread(self, thread_name):
+        """Stop the thread."""
+        print('Stopping thread', thread_name)
+
+        # Close the DPM context.
+        #self.thread_dict[thread_name]['daq_task'].cancel()
+        # Clean up the thread.
+        self.thread_dict[thread_name]['thread'].join()
+    '''
+
+            
     def acnet_daq(self,thread_name):
         thread_loop = asyncio.new_event_loop()
         asyncio.set_event_loop(thread_loop)
-        print("Starting thread ",thread_name)
-        print(self.thread_dict[thread_name])
 
-        #run this with read_many
         acsys.run_client(read_many, dict=self.thread_dict[thread_name])
-        #run this with read_once
-#        while(self.thread_dict[thread_name]['run_daq']):
-#            try:
-#                data=self.get_readings_once(self.thread_dict[thread_name]['paramlist'])    
-#            except:
-#                print("Acnet error ",thread_name)
-#            self.thread_lock.acquire()
-#            self.thread_dict[thread_name]['data']=data
-#            self.thread_lock.release()
 
         thread_loop.close()
         print("Stopping thread ",thread_name)
         
     def get_thread_data(self,thread_name):
-#        self.thread_lock.acquire()
-#        data=self.thread_dict[thread_name]['data']
-#        self.thread_lock.release()
-#        return data
         with self.thread_lock:
             return self.thread_dict[thread_name]['data']
-    
+
+
     def start_thread(self,thread_name,paramlist):
+        print('Starting thread', thread_name)
         daqthread = threading.Thread(target=self.acnet_daq, args=(thread_name,))
         self.thread_dict[thread_name]={'run_daq':True, 'thread': daqthread, 'data':[None]*len(paramlist), 'paramlist':paramlist}
         daqthread.start()
-
+    
     def stop_thread(self,thread_name):
         self.thread_dict[thread_name]['run_daq']=False
         self.thread_dict[thread_name]['thread'].join()
-
+    
     def stop_all_threads(self):
         for t in self.thread_dict:
             self.stop_thread(t)
@@ -157,8 +239,11 @@ class phasescan:
             print('Device list empty. Reading dummy devices')
             drf_list = self.build_set_device_list(self.paramlist)
         print(drf_list)
-        acsys.run_client(apply_settings, drf_list=drf_list, value_list=values,settings_role='testing') 
-    
+        acsys.run_client(set_once, drf_list=drf_list, value_list=values,settings_role='testing') 
+
+    def apply_settings(self,ramplist,evt):
+        acsys.run_client(set_many, ramp_list=ramplist,evt=evt,settings_role='testing') 
+
     
     def make_ramp_list(self,param_dict,numevents):
         tmplist = []
