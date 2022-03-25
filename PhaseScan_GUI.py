@@ -74,7 +74,7 @@ class Main(QMainWindow, Ui_MainWindow):
         for key in self.phasescan.param_dict:
             if self.phasescan.param_dict[key]['selected']==True:
                 if self.debug_pushButton.isChecked():
-                    self.phasescan.param_dict[key]['steps']=self.findChild(QSpinBox,'cube_spinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
+                    self.phasescan.param_dict[key]['steps']=self.findChild(QSpinBox,'cube_steps_spinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
                 else:
                     self.phasescan.param_dict[key]['steps']=self.findChild(QSpinBox,'steps_spinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
                     
@@ -123,21 +123,12 @@ class Main(QMainWindow, Ui_MainWindow):
     def scan(self):
         numevents = self.numevents_spinBox.value()
         evt = self.event_comboBox.currentText()
+        self.read_phases()
         print('Evt: ',evt, self.evt_dict[evt])
-        if self.cube_groupBox.isChecked():
+        if self.debug_pushButton.isChecked():
             print('Debug mode')
-            names = [self.findChild(QCheckBox,'cube_checkBox_%d'%i) for i in range(1,4)]
-            deltas = [self.findChild(QDoubleSpinBox,'cube_doubleSpinBox_%d'%i) for i in range(1,4)]
-            steps = [self.findChild(QSpinBox,'cube_spinBox_%d'%i) for i in range(1,4)]
-            idx=[i for i,n in enumerate(names) if n.isChecked()]
-            paramlist = [names[i].text() for i in idx]
-            deltas = [deltas[i].value() for i in idx]
-            steps = [steps[i].value() for i in idx]
-
-            setpoints = self.phasescan.get_settings_once(paramlist)
-
-            print(paramlist,deltas,steps, setpoints)
-            self.phasescan.apply_settings_once(paramlist,deltas)   
+            print(self.phasescan.param_dict)
+            #self.phasescan.apply_settings_once(paramlist,deltas)   
 
     def display_scan_results(self):
         for line in self.scanresults:
@@ -191,7 +182,6 @@ class TimePlot(QDialog):
         loadUi("expandPlot.ui", self)
 
         self.thread = QUuid.createUuid().toString()
-        #print(self.thread)
         self.selected = selected
         self.init_plot()
         self.label.setText('%s'%evt)
@@ -224,7 +214,6 @@ class TimePlot(QDialog):
         try:
             self.ax.cla()
             self.xaxis = np.append(self.xaxis,datetime.now())
-            #data = np.asarray(self.parent().phasescan.get_readings_once(self.selected))
             data = self.parent().phasescan.get_thread_data('%s'%self.thread)
             for i,d in enumerate(data):
                 self.yaxes[i] = np.append(self.yaxes[i],d)

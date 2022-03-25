@@ -641,21 +641,21 @@
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <item row="3" column="2">
-         <widget class="QSpinBox" name="cube_spinBox_3">
+         <widget class="QSpinBox" name="cube_steps_spinBox_3">
           <property name="minimum">
            <number>2</number>
           </property>
          </widget>
         </item>
         <item row="2" column="2">
-         <widget class="QSpinBox" name="cube_spinBox_2">
+         <widget class="QSpinBox" name="cube_steps_spinBox_2">
           <property name="minimum">
            <number>2</number>
           </property>
          </widget>
         </item>
         <item row="1" column="2">
-         <widget class="QSpinBox" name="cube_spinBox_1">
+         <widget class="QSpinBox" name="cube_steps_spinBox_1">
           <property name="minimum">
            <number>2</number>
           </property>
