@@ -23,11 +23,8 @@ class Main(QMainWindow, Ui_MainWindow):
         self.event_comboBox.addItems(['default','15Hz','52','53','0a'])
         self.evt_dict = {'default':'','15Hz':'@p,15000','52':'@e,52,e,0','53':'@e,53,e,0','0a':'@e,0a,e,0'}
 
-        #self.cube_groupBox.setDisabled(True)
-        #self.cube_groupBox.setVisible(False)
-        #self.phase_groupBox.setEnabled(True)
-        #self.phase_groupBox.setVisible(True)
         self.stackedWidget.setCurrentIndex(1)
+        self.cube_groupBox.setDisabled(True)
         
         for checkBox in self.findChildren(QCheckBox):
             checkBox.toggled.connect(self.add_param)
@@ -36,8 +33,17 @@ class Main(QMainWindow, Ui_MainWindow):
         for spinBox in self.findChildren(QSpinBox):
             if spinBox.objectName().find('steps')!=-1:
                 spinBox.valueChanged.connect(self.read_steps)
+        self.debug_pushButton.toggled.connect(self.toggle_debug)
 
+    def toggle_debug(self):
+        if self.debug_pushButton.isChecked():
+            self.stackedWidget.setCurrentIndex(0)
+            self.cube_groupBox.setEnabled(True)
+        else:
+            self.stackedWidget.setCurrentIndex(1)
+            self.cube_groupBox.setDisabled(True)
 
+        
     def add_param(self):
         for key in self.phasescan.param_dict:
             for checkBox in self.findChildren(QCheckBox):

@@ -45,7 +45,8 @@ async def read_many(con,dict):
         await dpm.start()
 
         async for evt_res in dpm:
-            if evt_res.isReadingFor(*list(range(0, len(dict['paramlist'])))):
+            #if evt_res.isReadingFor(*list(range(0, len(dict['paramlist'])))):
+            if isinstance(evt_res,acsys.dpm.ItemData):
                 dict['data'][evt_res.tag]=evt_res.data
                 if not dict['run_daq']:
                         break
@@ -89,10 +90,12 @@ class phasescan:
         print("Stopping thread ",thread_name)
         
     def get_thread_data(self,thread_name):
-        self.thread_lock.acquire()
-        data=self.thread_dict[thread_name]['data']
-        self.thread_lock.release()
-        return data
+#        self.thread_lock.acquire()
+#        data=self.thread_dict[thread_name]['data']
+#        self.thread_lock.release()
+#        return data
+        with self.thread_lock:
+            return self.thread_dict[thread_name]['data']
     
     def start_thread(self,thread_name,paramlist):
         daqthread = threading.Thread(target=self.acnet_daq, args=(thread_name,))
@@ -148,55 +151,56 @@ class phasescan:
     
     def make_ramp_list(self,param_dict,numevents):
         tmplist = []
-        done_first_ref=False
-        for scanned_dev in param_dict:
-            if param_dict[scanned_dev]['selected']==True:
-                phase=param_dict[scanned_dev]['phase']
-                delta=param_dict[scanned_dev]['delta']
-                for pset in list(dict.fromkeys([phase,phase-delta,phase+delta])):
-                    if not done_first_ref or phase!=pset:
-                        param_dict[scanned_dev]['phase']=pset
-                        tmplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))
-                        done_first_ref=True
-                        param_dict[scanned_dev]['phase']=phase #put back phase to nominal
+        devlist=[dev for dev in param_dict if param_dict[dev]['selected']==True]
+        tmplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))
+        for dev in devlist:
+            phase=param_dict[dev]['phase']
+            steps= -1 if param_dict[dev]['delta']==0 else param_dict[dev]['steps']
+
+            ramp=[phase-param_dict[dev]['delta']+2*param_dict[dev]['delta']/steps*i for i in range(steps+1)]
+            ramp=[val for val in ramp if val!=phase]
+            for val in ramp:
+                param_dict[dev]['phase']=val
+                tmplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))
+                param_dict[dev]['phase']=phase
+                
         ramplist=[]
         for l in tmplist:
             for i in range(numevents):
                 ramplist.append(l.copy())
         ramplist[0][0]='0'
         return ramplist
-
+    
     def make_loop_ramp_list(self,param_dict,numevents):
         limits = []
         for dev in param_dict:
             if param_dict[dev]['selected']==True:
-                limits.append([dev,param_dict[dev]['phase'],param_dict[dev]['delta'],param_dict[dev]['steps']])
+                limits.append([param_dict[dev]['device'],param_dict[dev]['phase'],param_dict[dev]['delta'],param_dict[dev]['steps']])
         print(limits)
 
         ramplist = []
-        par = [None]*len(limits)
-        self.do_loop(len(limits),limits,numevents,par,ramplist)
+        ramp = [None]*len(limits)
+        self.do_loop(len(limits),limits,numevents,ramp,ramplist)
 
-        ramplist[0][0] = '0'
+        ramplist[0][0]='0'
         return ramplist
         
-    def do_loop(self,N,limits,numevents,par,ramplist):
+    def do_loop(self,N,limits,numevents,ramp,ramplist):
 
         if N==0:
             return
         else:
             steps = 0 if limits[N-1][2]==0 else limits[N-1][3]
             for i in range(int(steps+1)):
-                par[N-1] = limits[N-1][1] - limits[N-1][2] + i*(2*limits[N-1][2]/limits[N-1][3])
-                self.do_loop(N-1,limits,numevents,par,ramplist)
+                ramp[N-1] = limits[N-1][1] - limits[N-1][2] + i*(2*limits[N-1][2]/limits[N-1][3])
+                self.do_loop(N-1,limits,numevents,ramp,ramplist)
 
                 line = [1]
                 if (N==1):
-                    for j in range(len(par)):
+                    for j in range(len(ramp)):
                         line.append(limits[N-1+j][0])
-                        line.append(par[j])
+                        line.append(ramp[j])
 
-                    #print (line)
                     for k in range(numevents):
                         ramplist.append(line.copy())
 
