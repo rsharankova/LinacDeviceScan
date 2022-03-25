@@ -1,6 +1,6 @@
 from PyQt6.uic import loadUiType, loadUi
 from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QSpinBox, QDoubleSpinBox, QPlainTextEdit, QDialog
-from PyQt6.QtCore import Qt, QUuid
+from PyQt6.QtCore import Qt, QUuid, QRegularExpression
 from phasescan import phasescan
 
 import numpy as np
@@ -24,7 +24,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.evt_dict = {'default':'','15Hz':'@p,15000','52':'@e,52,e,0','53':'@e,53,e,0','0a':'@e,0a,e,0'}
 
         self.stackedWidget.setCurrentIndex(1)
-        self.cube_groupBox.setDisabled(True)
+        #self.cube_groupBox.setDisabled(True)
         
         for checkBox in self.findChildren(QCheckBox):
             checkBox.toggled.connect(self.add_param)
@@ -38,10 +38,12 @@ class Main(QMainWindow, Ui_MainWindow):
     def toggle_debug(self):
         if self.debug_pushButton.isChecked():
             self.stackedWidget.setCurrentIndex(0)
-            self.cube_groupBox.setEnabled(True)
+            self.phasescan.swap_dict()
+            print(self.phasescan.param_dict)
         else:
             self.stackedWidget.setCurrentIndex(1)
-            self.cube_groupBox.setDisabled(True)
+            self.phasescan.swap_dict()
+            print(self.phasescan.param_dict)
 
         
     def add_param(self):
@@ -53,7 +55,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 elif checkBox.isChecked()==False and checkBox.text()==key:
                     self.phasescan.param_dict[key]['selected']=False
                     self.phasescan.param_dict[key]['phase']=0
-        #print(self.phasescan.param_dict.values())
+
 
     def read_phases(self):
         for key in self.phasescan.param_dict:
@@ -63,12 +65,18 @@ class Main(QMainWindow, Ui_MainWindow):
     def read_deltas(self):
         for key in self.phasescan.param_dict:
             if self.phasescan.param_dict[key]['selected']==True:
-                self.phasescan.param_dict[key]['delta']=self.findChild(QDoubleSpinBox,'doubleSpinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
+                if self.debug_pushButton.isChecked():
+                    self.phasescan.param_dict[key]['delta']=self.findChild(QDoubleSpinBox,'cube_doubleSpinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
+                else:
+                    self.phasescan.param_dict[key]['delta']=self.findChild(QDoubleSpinBox,'doubleSpinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
 
     def read_steps(self):
         for key in self.phasescan.param_dict:
             if self.phasescan.param_dict[key]['selected']==True:
-                self.phasescan.param_dict[key]['steps']=self.findChild(QSpinBox,'steps_spinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
+                if self.debug_pushButton.isChecked():
+                    self.phasescan.param_dict[key]['steps']=self.findChild(QSpinBox,'cube_spinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
+                else:
+                    self.phasescan.param_dict[key]['steps']=self.findChild(QSpinBox,'steps_spinBox_%d'%(self.phasescan.param_dict[key]['idx'])).value()
                     
     def select_all(self):
         for checkBox in self.findChildren(QCheckBox):

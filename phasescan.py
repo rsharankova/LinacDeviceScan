@@ -59,14 +59,25 @@ class phasescan:
     def __init__(self):
         self.thread_dict = {}
         self.thread_lock=threading.Lock()
-        self.paramlist = ['Z:CUBE_X','Z:CUBE_Y','Z:CUBE_Z']
-        self.param_dict = {'RFQ':{'device':'L:RFQPAH','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
+
+        self.main_dict = {'RFQ':{'device':'L:RFQPAH','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
                            'RFB':{'device':'L:RFBPAH','idx':2,'selected':False,'phase':0,'delta':0,'steps':2},
                            'Tank 1':{'device':'L:V1QSET','idx':3,'selected':False,'phase':0,'delta':0,'steps':2},
                            'Tank 2':{'device':'L:V2QSET','idx':4,'selected':False,'phase':0,'delta':0,'steps':2},
                            'Tank 3':{'device':'L:V3QSET','idx':5,'selected':False,'phase':0,'delta':0,'steps':2},
                            'Tank 4':{'device':'L:V4QSET','idx':6,'selected':False,'phase':0,'delta':0,'steps':2},
                            'Tank 5':{'device':'L:V5QSET','idx':7,'selected':False,'phase':0,'delta':0,'steps':2}}
+        self.debug_dict={'Cube X':{'device':'Z:CUBE_X','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
+                         'Cube Y':{'device':'Z:CUBE_Y','idx':2,'selected':False,'phase':0,'delta':0,'steps':2},
+                         'Cube Z':{'device':'Z:CUBE_Z','idx':3,'selected':False,'phase':0,'delta':0,'steps':2}}
+
+        self.param_dict=self.main_dict
+        
+    def swap_dict(self):
+        if self.param_dict==self.main_dict:
+            self.param_dict=self.debug_dict
+        else:
+            self.param_dict=self.main_dict
         
     def acnet_daq(self,thread_name):
         thread_loop = asyncio.new_event_loop()
@@ -125,8 +136,8 @@ class phasescan:
         if paramlist and len(paramlist)!=0:
             drf_list = self.build_set_device_list(paramlist)
         else:
-            print('Device list empty. Reading dummy devices')
-            drf_list = self.build_set_device_list(self.paramlist)
+            print('Device list empty')
+            drf_list = [self.debug_dict[key]['device'] for key in self.debug_dict]
         phases= acsys.run_client(read_once, drf_list=drf_list) 
         return phases
 
@@ -134,8 +145,8 @@ class phasescan:
         if paramlist and len(paramlist)!=0:
             drf_list = paramlist
         else:
-            print('Device list empty. Reading dummy devices')
-            drf_list = self.paramlist
+            print('Device list empty')
+            drf_list = [self.debug_dict[key]['device'] for key in self.debug_dict]
         phases= acsys.run_client(read_once, drf_list=drf_list) 
         return phases
 

@@ -600,7 +600,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>10</y>
+      <y>0</y>
       <width>321</width>
       <height>381</height>
      </rect>
@@ -615,7 +615,7 @@
         <x>9</x>
         <y>20</y>
         <width>311</width>
-        <height>121</height>
+        <height>141</height>
        </rect>
       </property>
       <property name="title">
@@ -633,31 +633,45 @@
       <widget class="QWidget" name="gridLayoutWidget_4">
        <property name="geometry">
         <rect>
-         <x>0</x>
+         <x>10</x>
          <y>10</y>
-         <width>301</width>
-         <height>99</height>
+         <width>291</width>
+         <height>130</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="1" column="0">
-         <widget class="QCheckBox" name="cube_checkBox_2">
-          <property name="text">
-           <string>Z:CUBE_Y</string>
+        <item row="3" column="2">
+         <widget class="QSpinBox" name="cube_spinBox_3">
+          <property name="minimum">
+           <number>2</number>
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QDoubleSpinBox" name="cube_doubleSpinBox_1"/>
+        <item row="2" column="2">
+         <widget class="QSpinBox" name="cube_spinBox_2">
+          <property name="minimum">
+           <number>2</number>
+          </property>
+         </widget>
         </item>
-        <item row="2" column="0">
+        <item row="1" column="2">
+         <widget class="QSpinBox" name="cube_spinBox_1">
+          <property name="minimum">
+           <number>2</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
          <widget class="QCheckBox" name="cube_checkBox_3">
           <property name="text">
            <string>Z:CUBE_Z</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
+        <item row="3" column="1">
+         <widget class="QDoubleSpinBox" name="cube_doubleSpinBox_3"/>
+        </item>
+        <item row="1" column="0">
          <widget class="QCheckBox" name="cube_checkBox_1">
           <property name="text">
            <string>Z:CUBE_X</string>
@@ -665,29 +679,81 @@
          </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QDoubleSpinBox" name="cube_doubleSpinBox_3"/>
-        </item>
-        <item row="1" column="1">
          <widget class="QDoubleSpinBox" name="cube_doubleSpinBox_2"/>
         </item>
+        <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="cube_doubleSpinBox_1"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QCheckBox" name="cube_checkBox_2">
+          <property name="text">
+           <string>Z:CUBE_Y</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Device</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="label_7">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Delta</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="2">
-         <widget class="QSpinBox" name="cube_spinBox_1">
-          <property name="minimum">
-           <number>2</number>
+         <widget class="QLabel" name="label_8">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="2">
-         <widget class="QSpinBox" name="cube_spinBox_2">
-          <property name="minimum">
-           <number>2</number>
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>25</height>
+           </size>
           </property>
-         </widget>
-        </item>
-        <item row="2" column="2">
-         <widget class="QSpinBox" name="cube_spinBox_3">
-          <property name="minimum">
-           <number>2</number>
+          <property name="text">
+           <string>Steps</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -701,7 +767,7 @@
        <rect>
         <x>0</x>
         <y>20</y>
-        <width>320</width>
+        <width>321</width>
         <height>351</height>
        </rect>
       </property>
@@ -724,7 +790,7 @@
         <item row="0" column="2">
          <widget class="QPushButton" name="expand_pushButton_1">
           <property name="text">
-           <string>Plot phases</string>
+           <string>Plot set</string>
           </property>
          </widget>
         </item>
@@ -781,7 +847,7 @@
            <bool>false</bool>
           </property>
           <property name="text">
-           <string>Delta (deg)</string>
+           <string>Delta </string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -880,16 +946,22 @@
         <item row="1" column="0">
          <widget class="QLabel" name="label_3">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>25</height>
+           </size>
           </property>
           <property name="autoFillBackground">
            <bool>false</bool>
           </property>
           <property name="text">
-           <string>Phase set</string>
+           <string>Device</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
