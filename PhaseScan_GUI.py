@@ -18,13 +18,16 @@ class Main(QMainWindow, Ui_MainWindow):
         super(Main, self).__init__()
         self.setupUi(self)
         self.ramplist = []
+        self.read_list = []
         self.scanresults = []
         self.phasescan = phasescan()
         self.event_comboBox.addItems(['default','15Hz','52','53','0a'])
         self.evt_dict = {'default':'','15Hz':'@p,15000','52':'@e,52,e,0','53':'@e,53,e,0','0a':'@e,0a,e,0'}
 
         self.stackedWidget.setCurrentIndex(1)
-        #self.cube_groupBox.setDisabled(True)
+        self.list_plainTextEdit.setPlainText('ramplist.csv')
+        self.scan_plainTextEdit.setPlainText('devicescan.csv')
+        self.read_plainTextEdit.setPlainText('Reading_devices.csv')
         
         for checkBox in self.findChildren(QCheckBox):
             checkBox.toggled.connect(self.add_param)
@@ -123,16 +126,23 @@ class Main(QMainWindow, Ui_MainWindow):
         for line in self.ramplist:
             print(','.join([str(l) for l in line]))
 
-    
+
+    def reading(self):
+        if not self.read_plainTextEdit.toPlainText():
+            print('Using default filename')
+            self.read_plainTextEdit.setPlainText('Reading_devices.csv')
+        filename = self.read_plainTextEdit.toPlainText()
+        self.read_list = self.phasescan.readList(filename)
+        
+            
     def scan(self):
         numevents = self.numevents_spinBox.value()
         evt = self.event_comboBox.currentText()
+        self.reading()
         self.read_phases()
         if self.debug_pushButton.isChecked():
             print('Debug mode')
-            #[print(n) for n in self.ramplist[0] if isinstance(n,float)]
-            
-            self.phasescan.apply_settings(self.ramplist,self.evt_dict[evt])   
+            self.phasescan.apply_settings(self.ramplist,self.read_list,self.evt_dict[evt])   
 
     def display_scan_results(self):
         for line in self.scanresults:
@@ -219,10 +229,12 @@ class TimePlot(QDialog):
             self.ax.cla()
             self.xaxis = np.append(self.xaxis,datetime.now())
             data = self.parent().phasescan.get_thread_data('%s'%self.thread)
+            labels = [s.split('@')[0] for s in self.selected]
             for i,d in enumerate(data):
                 self.yaxes[i] = np.append(self.yaxes[i],d)
-                self.ax.plot(self.xaxis,self.yaxes[i])
+                self.ax.plot(self.xaxis,self.yaxes[i],label=labels[i])
 
+            self.ax.legend()
             self.fig.subplots_adjust(left=0.1)
             self.fig.subplots_adjust(right=0.95)
             self.fig.subplots_adjust(bottom=0.22)

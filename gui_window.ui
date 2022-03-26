@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>959</width>
-    <height>450</height>
+    <width>1022</width>
+    <height>436</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -83,14 +83,21 @@
      <rect>
       <x>380</x>
       <y>270</y>
-      <width>541</width>
-      <height>91</height>
+      <width>618</width>
+      <height>111</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="displayList_pushButton">
+       <property name="text">
+        <string>Display list</string>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="3">
       <widget class="QPlainTextEdit" name="scan_plainTextEdit">
        <property name="sizePolicy">
@@ -104,13 +111,6 @@
          <width>120</width>
          <height>25</height>
         </size>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QPushButton" name="displayList_pushButton">
-       <property name="text">
-        <string>Display list</string>
        </property>
       </widget>
      </item>
@@ -162,6 +162,38 @@
       <widget class="QPushButton" name="genList_pushButton">
        <property name="text">
         <string>Make ramp list</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>Reading devices file:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QPlainTextEdit" name="read_plainTextEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>120</width>
+         <height>25</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -636,7 +668,7 @@
          <x>10</x>
          <y>10</y>
          <width>291</width>
-         <height>130</height>
+         <height>132</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout">
@@ -1074,7 +1106,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>959</width>
+     <width>1022</width>
      <height>24</height>
     </rect>
    </property>

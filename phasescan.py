@@ -1,6 +1,7 @@
 import acsys.dpm
 import threading
 import asyncio
+import io
 
 async def set_once(con,drf_list,value_list,settings_role):
     settings = [None]*len(drf_list)
@@ -23,31 +24,29 @@ async def set_once(con,drf_list,value_list,settings_role):
     return None
 
 
-async def set_many(con,ramp_list,evt,settings_role):
+async def set_many(con,ramp_list,read_list,evt,settings_role):
     async with acsys.dpm.DPMContext(con) as dpm:
         await dpm.enable_settings(role=settings_role)
 
-        drf_list = [s for s in ramp_list[0] if str(s).find(':')!=-1]
-
-        drf_list=['%s%s'%(l,evt) for l in drf_list]
+        set_list = [s for s in ramp_list[0] if str(s).find(':')!=-1]
+        set_list=['%s.SETTING%s'%(l,evt) for l in set_list]
+        drf_list = set_list+['%s%s'%(l,evt) for l in read_list if len(read_list)!=0]
+        print(drf_list)
         for i, dev in enumerate(drf_list):
             await dpm.add_entry(i, dev)
 
         await dpm.start()
-        ii=0
-        async for evt_res in dpm:
-            if evt_res.isReadingFor(0):
-                print('0 ',evt_res)
-                vals = [n for n in ramp_list[ii] if isinstance(n,float)]
-                setpairs = list(enumerate(vals))
-                await dpm.apply_settings(setpairs[1:])
-                ii = ii+1
-
-            elif evt_res.isReadingFor(*list(range(0, len(drf_list)))):
-                print('other ',evt_res)
-            if ii>=min(5,len(ramp_list)):
-                break
-                
+        for rr in ramp_list:
+            setpairs = list(enumerate([n for n in rr if isinstance(n,float)]))
+            await dpm.apply_settings(setpairs)
+            data = [None]*len(drf_list)
+            async for reply in dpm:
+                if reply.isReadingFor(*list(range(0, len(drf_list)))):
+                    data[reply.tag]= reply.data
+                if data.count(None)==0:
+                    break
+            print(data)
+            
     return None
 
 async def read_once(con,drf_list):
@@ -244,8 +243,19 @@ class phasescan:
         print(drf_list)
         acsys.run_client(set_once, drf_list=drf_list, value_list=values,settings_role='testing') 
 
-    def apply_settings(self,ramplist,evt):
-        acsys.run_client(set_many, ramp_list=ramplist,evt=evt,settings_role='testing') 
+    def readList(self,filename):
+        try:
+            file = io.open(r'%s'%filename)
+            lines = file.readlines()
+            read_list  = [l.strip('\n').strip(',') for l in lines if l.find(':')!=-1 and isinstance(l,str)]
+
+        except:
+            read_list = []
+            print('Read device list empty')
+        return read_list
+        
+    def apply_settings(self,ramp_list,read_list,evt):
+        acsys.run_client(set_many, ramp_list=ramp_list,read_list=read_list,evt=evt,settings_role='testing') 
 
     
     def make_ramp_list(self,param_dict,numevents):
