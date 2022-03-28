@@ -3,6 +3,7 @@ import threading
 import asyncio
 import io
 import pandas as pd
+from functools import reduce
 
 async def set_once(con,drf_list,value_list,settings_role):
     settings = [None]*len(drf_list)
@@ -32,22 +33,34 @@ async def set_many(con,ramp_list,read_list,evt,settings_role,data):
         set_list = [s for s in ramp_list[0] if str(s).find(':')!=-1]
         set_list=['%s.SETTING%s'%(l,evt) for l in set_list]
         drf_list = set_list+['%s%s'%(l,evt) for l in read_list if len(read_list)!=0]
-        print(drf_list)
+
         for i, dev in enumerate(drf_list):
             await dpm.add_entry(i, dev)
 
         await dpm.start()
+
+        initial = [None]*len(drf_list)
+        async for reply in dpm:
+            if isinstance(reply,acsys.dpm.ItemData):
+                initial[reply.tag]= reply.data
+            if initial.count(None)==0:
+                break
+
         for rr in ramp_list:
+            one_data = [None]*len(drf_list)
             setpairs = list(enumerate([n for n in rr if isinstance(n,float)]))
             await dpm.apply_settings(setpairs)
-            one_data = [None]*len(drf_list)
+        
             async for reply in dpm:
-                if reply.isReadingFor(*list(range(0, len(drf_list)))):
+                if isinstance(reply,acsys.dpm.ItemData):
                     one_data[reply.tag]= reply.data
+                    data.append({'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
                 if one_data.count(None)==0:
                     break
-            data.append(one_data)
-            
+
+        setpairs = list(enumerate(initial))
+        await dpm.apply_settings(setpairs)
+        
     return None
 
 async def read_once(con,drf_list):
@@ -131,9 +144,7 @@ class phasescan:
         self.debug_role='testing'
         self.main_role='linac_daily_rf_tuning'
         self.role=self.main_role
-        
-        self.scan_data=[]
-        
+                
     def swap_dict(self):
         if self.param_dict==self.main_dict:
             self.param_dict=self.debug_dict
@@ -142,26 +153,6 @@ class phasescan:
             self.param_dict=self.main_dict
             self.role=self.main_role
 
-    def fill_dataframe(data):
-        df = pd.DataFrame.from_records(data)
-        devlist = df.name.unique()
-        dflist=[]
-        for dev in devlist:
-            dfdev= df[df.name==dev][['stamp','data']]
-            dfdev['stamp']= pd.to_datetime(dfdev['stamp'])
-            dfdev['TS']=dfdev['stamp']
-            dfdev.rename(columns={'data':dev, 'TS':'%s Timestamp'%dev},inplace=True)
-            dfdev.set_index('stamp').reset_index(drop=False, inplace=True)
-            dflist.append(dfdev)        
-        
-        ddf = reduce(lambda  left,right: pd.merge_asof(left,right,on=['stamp'],direction='nearest',tolerance=pd.Timedelta('10ms')), dflist)
-        ddf.drop(columns=['stamp'], inplace=True)
-        print( ddf.head() )
-        return ddf
-
-    def save_dataframe(df, device):
-        today = date.today().isoformat()
-        df.to_csv('%s_%s.csv'%(today,device),index_label='idx')
             
     '''
     def _acnet_daq(self, thread_name):
@@ -293,13 +284,30 @@ class phasescan:
             print('Read device list empty')
         return read_list
         
-    def apply_settings(self,ramp_list,read_list,evt,thread_name):
-        #acsys.run_client(set_many, ramp_list=ramp_list,read_list=read_list,evt=evt,settings_role='testing')
+    def apply_settings(self,ramp_list,read_list,evt,thread_name,scan_data):
         print('Starting thread', thread_name)
-        daqthread = threading.Thread(target=self.acnet_daq_scan, args=(thread_name,ramp_list,read_list,evt,self.role,self.scan_data,))
+        daqthread = threading.Thread(target=self.acnet_daq_scan, args=(thread_name,ramp_list,read_list,evt,self.role,scan_data,))
         daqthread.start()
-        #daqthread.join()
-        #daqthread.stop()
+
+
+    def fill_write_dataframe(self,data,filename):
+        df = pd.DataFrame.from_records(data)
+        devlist = df.name.unique()
+        dflist=[]
+        for dev in devlist:
+            dfdev= df[df.name==dev][['stamp','data']]
+            dfdev['stamp']= pd.to_datetime(dfdev['stamp'])
+            dfdev['TS']=dfdev['stamp']
+            dfdev.rename(columns={'data':dev, 'TS':'%s Timestamp'%dev},inplace=True)
+            dfdev.set_index('stamp').reset_index(drop=False, inplace=True)
+            dflist.append(dfdev)        
+        
+        ddf = reduce(lambda  left,right: pd.merge_asof(left,right,on=['stamp'],direction='nearest',tolerance=pd.Timedelta('10ms')), dflist)
+        ddf.drop(columns=['stamp'], inplace=True)
+        print( ddf.head() )
+        
+        #today = date.today().isoformat()
+        ddf.to_csv('%s.csv'%(filename),index_label='idx')
 
     
     def make_ramp_list(self,param_dict,numevents):

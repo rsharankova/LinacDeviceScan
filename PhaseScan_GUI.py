@@ -119,6 +119,7 @@ class Main(QMainWindow, Ui_MainWindow):
             output.writelines(["%s\n"%(','.join([str(l) for l in line])) for line in self.ramplist])
             output.close()
             print('Wrote %s to disk'%filename)
+
         except:
             print('Something went wrong')
 
@@ -143,11 +144,15 @@ class Main(QMainWindow, Ui_MainWindow):
         if self.debug_pushButton.isChecked():
             print('Debug mode')
             self.thread = QUuid.createUuid().toString()
-            self.phasescan.apply_settings(self.ramplist,self.read_list,self.evt_dict[evt],self.thread)   
-
+            try:
+                self.phasescan.apply_settings(self.ramplist,self.read_list,self.evt_dict[evt],self.thread,self.scanresults)   
+            except:
+                print('Scan failed')
+                
     def display_scan_results(self):
         for line in self.scanresults:
-            print(','.join([str(l) for l in line]))
+            #print(','.join([str(l) for l in line]))
+            print(line)
 
     def write_scan_results(self):        
         if not self.scan_plainTextEdit.toPlainText():
@@ -155,12 +160,10 @@ class Main(QMainWindow, Ui_MainWindow):
             self.scan_plainTextEdit.setPlainText('devicescan.csv')
         filename = self.scan_plainTextEdit.toPlainText()
         try:
-            output = open(r'%s'%filename,'w', newline='' )
-            output.writelines(["%s\n"%(','.join([str(l) for l in line])) for line in self.scanresults])
-            output.close()
+            self.phasescan.fill_write_dataframe(self.scanresults,filename)
             print('Wrote %s to disk'%filename)
-        except:
-            print('Something went wrong')
+        except Exception as e:
+            print('Something went wrong',e)
 
 
     def expandMon(self):
@@ -207,7 +210,7 @@ class TimePlot(QDialog):
         self.canvas = FigureCanvas(self.fig)
         self.verticalLayout.addWidget(self.canvas)
 
-        self.timer = self.canvas.new_timer(60)
+        self.timer = self.canvas.new_timer(50)
         self.timer.add_callback(self.update_plot)
         
 
@@ -263,7 +266,7 @@ class BarPlot(QDialog):
         self.canvas = FigureCanvas(self.fig)
         self.verticalLayout.addWidget(self.canvas)
 
-        self.timer = self.canvas.new_timer(200)
+        self.timer = self.canvas.new_timer(50)
         self.timer.add_callback(self.update_plot)
         
 
