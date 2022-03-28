@@ -2,6 +2,7 @@ import acsys.dpm
 import threading
 import asyncio
 import io
+import pandas as pd
 
 async def set_once(con,drf_list,value_list,settings_role):
     settings = [None]*len(drf_list)
@@ -24,7 +25,7 @@ async def set_once(con,drf_list,value_list,settings_role):
     return None
 
 
-async def set_many(con,ramp_list,read_list,evt,settings_role):
+async def set_many(con,ramp_list,read_list,evt,settings_role,data):
     async with acsys.dpm.DPMContext(con) as dpm:
         await dpm.enable_settings(role=settings_role)
 
@@ -39,13 +40,13 @@ async def set_many(con,ramp_list,read_list,evt,settings_role):
         for rr in ramp_list:
             setpairs = list(enumerate([n for n in rr if isinstance(n,float)]))
             await dpm.apply_settings(setpairs)
-            data = [None]*len(drf_list)
+            one_data = [None]*len(drf_list)
             async for reply in dpm:
                 if reply.isReadingFor(*list(range(0, len(drf_list)))):
-                    data[reply.tag]= reply.data
-                if data.count(None)==0:
+                    one_data[reply.tag]= reply.data
+                if one_data.count(None)==0:
                     break
-            print(data)
+            data.append(one_data)
             
     return None
 
@@ -126,13 +127,42 @@ class phasescan:
                          'Z:CUBE_Z':{'device':'Z:CUBE_Z','idx':3,'selected':False,'phase':0,'delta':0,'steps':2}}
 
         self.param_dict=self.main_dict
+
+        self.debug_role='testing'
+        self.main_role='linac_daily_rf_tuning'
+        self.role=self.main_role
+        
+        self.scan_data=[]
         
     def swap_dict(self):
         if self.param_dict==self.main_dict:
             self.param_dict=self.debug_dict
+            self.role=self.debug_role
         else:
             self.param_dict=self.main_dict
+            self.role=self.main_role
 
+    def fill_dataframe(data):
+        df = pd.DataFrame.from_records(data)
+        devlist = df.name.unique()
+        dflist=[]
+        for dev in devlist:
+            dfdev= df[df.name==dev][['stamp','data']]
+            dfdev['stamp']= pd.to_datetime(dfdev['stamp'])
+            dfdev['TS']=dfdev['stamp']
+            dfdev.rename(columns={'data':dev, 'TS':'%s Timestamp'%dev},inplace=True)
+            dfdev.set_index('stamp').reset_index(drop=False, inplace=True)
+            dflist.append(dfdev)        
+        
+        ddf = reduce(lambda  left,right: pd.merge_asof(left,right,on=['stamp'],direction='nearest',tolerance=pd.Timedelta('10ms')), dflist)
+        ddf.drop(columns=['stamp'], inplace=True)
+        print( ddf.head() )
+        return ddf
+
+    def save_dataframe(df, device):
+        today = date.today().isoformat()
+        df.to_csv('%s_%s.csv'%(today,device),index_label='idx')
+            
     '''
     def _acnet_daq(self, thread_name):
         """Run the ACNet DAQ."""
@@ -185,7 +215,16 @@ class phasescan:
 
         thread_loop.close()
         print("Stopping thread ",thread_name)
-        
+
+    def acnet_daq_scan(self,thread_name,ramp_list,read_list,evt,role,scan_data):
+        thread_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(thread_loop)
+
+        acsys.run_client(set_many, ramp_list=ramp_list,read_list=read_list,evt=evt,settings_role=role,data=scan_data)
+
+        thread_loop.close()
+        print("Stopping thread ",thread_name)
+
     def get_thread_data(self,thread_name):
         with self.thread_lock:
             return self.thread_dict[thread_name]['data']
@@ -254,8 +293,13 @@ class phasescan:
             print('Read device list empty')
         return read_list
         
-    def apply_settings(self,ramp_list,read_list,evt):
-        acsys.run_client(set_many, ramp_list=ramp_list,read_list=read_list,evt=evt,settings_role='testing') 
+    def apply_settings(self,ramp_list,read_list,evt,thread_name):
+        #acsys.run_client(set_many, ramp_list=ramp_list,read_list=read_list,evt=evt,settings_role='testing')
+        print('Starting thread', thread_name)
+        daqthread = threading.Thread(target=self.acnet_daq_scan, args=(thread_name,ramp_list,read_list,evt,self.role,self.scan_data,))
+        daqthread.start()
+        #daqthread.join()
+        #daqthread.stop()
 
     
     def make_ramp_list(self,param_dict,numevents):

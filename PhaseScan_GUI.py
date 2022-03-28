@@ -142,7 +142,8 @@ class Main(QMainWindow, Ui_MainWindow):
         self.read_phases()
         if self.debug_pushButton.isChecked():
             print('Debug mode')
-            self.phasescan.apply_settings(self.ramplist,self.read_list,self.evt_dict[evt])   
+            self.thread = QUuid.createUuid().toString()
+            self.phasescan.apply_settings(self.ramplist,self.read_list,self.evt_dict[evt],self.thread)   
 
     def display_scan_results(self):
         for line in self.scanresults:
