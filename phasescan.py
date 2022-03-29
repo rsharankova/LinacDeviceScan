@@ -39,13 +39,6 @@ async def set_many(con,ramp_list,read_list,evt,settings_role,data):
 
         await dpm.start()
 
-        initial = [None]*len(drf_list)
-        async for reply in dpm:
-            if isinstance(reply,acsys.dpm.ItemData):
-                initial[reply.tag]= reply.data
-            if initial.count(None)==0:
-                break
-
         for rr in ramp_list:
             one_data = [None]*len(drf_list)
             setpairs = list(enumerate([n for n in rr if isinstance(n,float)]))
@@ -57,10 +50,6 @@ async def set_many(con,ramp_list,read_list,evt,settings_role,data):
                     data.append({'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
                 if one_data.count(None)==0:
                     break
-
-        setpairs = list(enumerate(initial))
-        await dpm.apply_settings(setpairs)
-        
     return None
 
 async def read_once(con,drf_list):
@@ -200,21 +189,20 @@ class phasescan:
             
     def acnet_daq(self,thread_name):
         thread_loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(thread_loop)
 
-        acsys.run_client(read_many, dict=self.thread_dict[thread_name])
-
-        thread_loop.close()
-        print("Stopping thread ",thread_name)
+        try:
+            asyncio.set_event_loop(thread_loop)
+            acsys.run_client(read_many, dict=self.thread_dict[thread_name])
+        finally:
+            thread_loop.close()
 
     def acnet_daq_scan(self,thread_name,ramp_list,read_list,evt,role,scan_data):
         thread_loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(thread_loop)
-
-        acsys.run_client(set_many, ramp_list=ramp_list,read_list=read_list,evt=evt,settings_role=role,data=scan_data)
-
+        try:
+            asyncio.set_event_loop(thread_loop)
+            acsys.run_client(set_many, ramp_list=ramp_list,read_list=read_list,evt=evt,settings_role=role,data=scan_data)
+        finally:
         thread_loop.close()
-        print("Stopping thread ",thread_name)
 
     def get_thread_data(self,thread_name):
         with self.thread_lock:
@@ -324,7 +312,8 @@ class phasescan:
                 param_dict[dev]['phase']=val
                 tmplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))
                 param_dict[dev]['phase']=phase
-                
+
+        tmplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))
         ramplist=[]
         for l in tmplist:
             for i in range(numevents):
@@ -334,15 +323,14 @@ class phasescan:
     
     def make_loop_ramp_list(self,param_dict,numevents):
         limits = []
-        for dev in param_dict:
-            if param_dict[dev]['selected']==True:
-                limits.append([param_dict[dev]['device'],param_dict[dev]['phase'],param_dict[dev]['delta'],param_dict[dev]['steps']])
+        [limits.append( [val['device'],val['phase'],val['delta'],val['steps']]) for key,val in param_dict.items() if val['selected']==True]
         print(limits)
 
         ramplist = []
         ramp = [None]*len(limits)
         self.do_loop(len(limits),limits,numevents,ramp,ramplist)
 
+        ramplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))
         ramplist[0][0]='0'
         return ramplist
         

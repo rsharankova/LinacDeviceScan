@@ -99,6 +99,7 @@ class Main(QMainWindow, Ui_MainWindow):
 
 
     def generate_ramp_list(self):
+        self.ramplist = []
         self.read_phases()
         numevents = self.numevents_spinBox.value()
         if self.oneD_radioButton.isChecked():
