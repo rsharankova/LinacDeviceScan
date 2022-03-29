@@ -307,7 +307,7 @@ class phasescan:
         print( ddf.head() )
         
         #today = date.today().isoformat()
-        ddf.to_csv('%s.csv'%(filename),index_label='idx')
+        ddf.to_csv('%s'%(filename),index_label='idx')
 
     
     def make_ramp_list(self,param_dict,numevents):

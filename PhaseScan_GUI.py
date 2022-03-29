@@ -7,6 +7,9 @@ import numpy as np
 from datetime import datetime,timedelta
 
 from matplotlib.figure import Figure
+from matplotlib import pyplot as plt
+from matplotlib.ticker import MaxNLocator
+
 from matplotlib.backends.backend_qtagg import (
     FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
@@ -181,7 +184,8 @@ class Main(QMainWindow, Ui_MainWindow):
 
     def barLosses(self):
         evt = self.event_comboBox.currentText()
-        selected = [self.listWidget.item(i).text() for i in range(self.listWidget.count()) if self.listWidget.item(i).text().find('LM')!=-1]
+        selected = [self.listWidget.item(i).text() for i in range(self.listWidget.count()) if self.listWidget.item(i).text().find('LM')!=-1
+                    and self.listWidget.item(i).text().find('LMSM')==-1]
         selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in selected]
         dlg = BarPlot(selected,evt,self)
         dlg.show()
@@ -206,7 +210,11 @@ class TimePlot(QDialog):
 
     def init_plot(self):
         self.fig = Figure()
-        self.ax = self.fig.add_subplot(111)
+
+        self.ax = [None]*len(self.selected)
+        self.ax[0] = self.fig.add_subplot(111)
+        for i in range(1,len(self.selected)):
+            self.ax[i] = self.ax[0].twinx()
         self.canvas = FigureCanvas(self.fig)
         self.verticalLayout.addWidget(self.canvas)
 
@@ -230,19 +238,40 @@ class TimePlot(QDialog):
             
     def update_plot(self):
         try:
-            self.ax.cla()
+            
             self.xaxis = np.append(self.xaxis,datetime.now())
             data = self.parent().phasescan.get_thread_data('%s'%self.thread)
             labels = [s.split('@')[0] for s in self.selected]
-            for i,d in enumerate(data):
-                self.yaxes[i] = np.append(self.yaxes[i],d)
-                self.ax.plot(self.xaxis,self.yaxes[i],label=labels[i])
+            p = [None]*len(self.selected)
 
-            self.ax.legend()
-            self.fig.subplots_adjust(left=0.1)
-            self.fig.subplots_adjust(right=0.95)
-            self.fig.subplots_adjust(bottom=0.22)
-            self.fig.subplots_adjust(top=0.95)
+            colors = plt.rcParams['axes.prop_cycle']
+            colors = colors.by_key()['color']
+
+            for i,d in enumerate(data):
+                self.ax[i].cla()
+                            
+                self.yaxes[i] = np.append(self.yaxes[i],d)
+                p[i], =self.ax[i].plot(self.xaxis,self.yaxes[i],c=colors[i],label=labels[i])
+                self.ax[i].tick_params(axis='y', colors=colors[i], labelsize='small',rotation=90)
+                self.ax[i].yaxis.set_major_locator(MaxNLocator(5))
+
+                if i%2==0:
+                    self.ax[i].yaxis.tick_left()
+                    for yl in self.ax[i].get_yticklabels():
+                        yl.set_x( -0.025*(i/2.) )
+                        yl.set(verticalalignment='bottom')
+
+                else:
+                    self.ax[i].yaxis.tick_right()
+                    for yl in self.ax[i].get_yticklabels():
+                        yl.set_x( 1.0+0.025*(i-1)/2.)
+                        yl.set(verticalalignment='bottom')
+
+            self.ax[0].legend(handles=p)
+            self.fig.subplots_adjust(left=0.12)
+            self.fig.subplots_adjust(right=0.88)
+            self.fig.subplots_adjust(bottom=0.12)
+            self.fig.subplots_adjust(top=0.88)
             self.canvas.draw_idle()
 
         except Exception as e:
@@ -286,7 +315,6 @@ class BarPlot(QDialog):
         try:
             data = self.parent().phasescan.get_thread_data('%s'%self.thread)
             self.ax.cla()
-            #self.ax.set_ylim([0.,max(data)])
             self.ax.bar([i for i in range(len(data))],height=data)
             labels = [s.split('@')[0] for s in self.selected]
             self.ax.set_xticks([i for i in range(len(data))],labels,rotation = 'vertical',fontsize=6)
