@@ -202,7 +202,7 @@ class phasescan:
             asyncio.set_event_loop(thread_loop)
             acsys.run_client(set_many, ramp_list=ramp_list,read_list=read_list,evt=evt,settings_role=role,data=scan_data)
         finally:
-        thread_loop.close()
+            thread_loop.close()
 
     def get_thread_data(self,thread_name):
         with self.thread_lock:
