@@ -1,5 +1,5 @@
 from PyQt6.uic import loadUiType, loadUi
-from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QSpinBox, QDoubleSpinBox, QPlainTextEdit, QDialog, QComboBox, QHBoxLayout, QLabel, QPushButton
+from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QSpinBox, QDoubleSpinBox, QPlainTextEdit, QDialog, QComboBox, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, QPushButton
 from PyQt6.QtCore import Qt, QUuid, QRegularExpression,QSortFilterProxyModel, QAbstractTableModel
 from phasescan import phasescan
 
@@ -20,6 +20,7 @@ class TableModel(QAbstractTableModel):
         super().__init__()
         self._data = [[dev] for dev in data]
         self._data=sorted(self._data)
+        
     def data(self, index, role):
         if role == Qt.ItemDataRole.DisplayRole:
             return self._data[index.row()][index.column()]
@@ -38,6 +39,7 @@ class TableModel(QAbstractTableModel):
         self._data=sorted(self._data)
 
 
+                                                                          
 Ui_MainWindow, QMainWindow = loadUiType('gui_window.ui')
 
 class Main(QMainWindow, Ui_MainWindow):
@@ -55,6 +57,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setFilterKeyColumn(-1)  
         self.proxy_model.setSourceModel(self.model)
+        self.proxy_model.setFilterCaseSensitivity( Qt.CaseSensitivity.CaseInsensitive )
         #self.proxy_model.sort(0, Qt.SortOrder.AscendingOrder)
 
         self.table.setShowGrid(False) 
@@ -62,7 +65,20 @@ class Main(QMainWindow, Ui_MainWindow):
         self.table.horizontalHeader().hide()
         self.table.verticalHeader().hide()
         self.table.verticalHeader().setDefaultSectionSize(20)
-        self.table.horizontalHeader().setDefaultSectionSize(20)
+        self.table.horizontalHeader().setDefaultSectionSize(200)
+
+        dev_gridLayout = QGridLayout()
+        dev_gridLayout.addWidget(self.selectall_pushButton_2,0,1,1,1)
+        dev_gridLayout.addWidget(self.clearall_pushButton_2,0,2,1,1)
+        dev_gridLayout.addWidget(self.mainP_pushButton,0,3,1,1)
+        dev_gridLayout.addWidget(self.label_4,1,1,1,1)
+        dev_gridLayout.addWidget(self.label_5,1,2,1,1)
+        dev_gridLayout.addWidget(self.label_6,1,3,1,1)
+        dev_gridLayout.addWidget(self.dev_checkBox_8,2,0,1,1)
+        dev_gridLayout.addWidget(self.dev_comboBox_8,2,1,1,1)
+        dev_gridLayout.addWidget(self.doubleSpinBox_8,2,2,1,1)
+        dev_gridLayout.addWidget(self.steps_spinBox_8,2,3,1,1)
+        self.dev_groupBox.setLayout(dev_gridLayout)
         
         self.stackedWidget.setCurrentIndex(0)
         self.list_plainTextEdit.setPlainText('ramplist.csv')
@@ -88,12 +104,45 @@ class Main(QMainWindow, Ui_MainWindow):
         self.clearall_pushButton_1.clicked.connect(self.clear_all)
         self.clearall_pushButton_2.clicked.connect(self.clear_all)
 
-        self.add_pushButton.clicked.connect(self.add_device)
-        self.remove_pushButton.clicked.connect(self.remove_device)
+        self.add_pushButton.clicked.connect(self.add_list_item)
+        self.remove_pushButton.clicked.connect(self.remove_list_item)
+
+        self.searchbar.textChanged.connect(self.proxy_model.setFilterFixedString)
+
+        self.bar_pushButton.clicked.connect(self.bar)
+
+        self.addDevice_pushButton.clicked.connect(self.add_device)
+        self.removeDevice_pushButton.setEnabled(False)
+        self.stackedWidget.currentChanged.connect(self.removeDevice_pushButton.setEnabled)
+        self.removeDevice_pushButton.clicked.connect(self.remove_device)
         
         #self.populate_list()
 
     def add_device(self):
+        num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')==-1]))
+        row = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('dev')!=-1]))+2
+        print(num,row)
+        checkBox = QCheckBox()
+        checkBox.setObjectName('dev_checkBox_%d'%num)
+        checkBox.setText('')
+        self.dev_groupBox.layout().addWidget(checkBox,row,0,1,1)
+
+        comboBox = QComboBox()
+        comboBox.setObjectName('dev_comboBox_%d'%num)
+        self.dev_groupBox.layout().addWidget(comboBox,row,1,1,1)
+
+        doubleSpinBox = QDoubleSpinBox()
+        doubleSpinBox.setObjectName('doubleSpinBox_%d'%num)
+        self.dev_groupBox.layout().addWidget(doubleSpinBox,row,2,1,1)
+
+        stepsSpinBox = QSpinBox()
+        stepsSpinBox.setObjectName('steps_spinBox_%d'%num)
+        self.dev_groupBox.layout().addWidget(stepsSpinBox,row,3,1,1)
+        
+    def remove_device(self):
+        print('blip blop')
+        
+    def add_list_item(self):
 
         tx=self.searchbar.text()
         self.searchbar.setText("")
@@ -109,7 +158,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.searchbar.setText("Start typing device name")
         self.searchbar.setText(tx)
 
-    def remove_device(self):
+    def remove_list_item(self):
 
         for dev in self.listWidget.selectedItems():
             self.model.addRow(dev.text())
@@ -136,7 +185,6 @@ class Main(QMainWindow, Ui_MainWindow):
             self.stackedWidget.setCurrentIndex(0)
 
     def populate_list(self):
-        print(self.phasescan.dev_list[0])
         for dev in self.phasescan.dev_list:
             self.listWidget.addItem(dev)
         
@@ -279,10 +327,15 @@ class Main(QMainWindow, Ui_MainWindow):
             dlg = TimePlot(selected,evt,self)
             dlg.show()
 
+    def bar(self):
+        evt = self.event_comboBox.currentText()
+        selected = ['%s%s'%(item.text(),self.evt_dict[evt]) for item in self.listWidget.selectedItems()]
+        if len(selected)>0:
+            dlg = BarPlot(selected,evt,'',self)
+            dlg.show()
+            
     def barLosses(self):
         evt = self.event_comboBox.currentText()
-        #selected = [self.listWidget.item(i).text() for i in range(self.listWidget.count()) if self.listWidget.item(i).text().find('LM')!=-1
-        #            and self.listWidget.item(i).text().find('LMSM')==-1]
         selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in self.phasescan.LMs]
         if len(selected)>0:
             dlg = BarPlot(selected,evt,'loss',self)
@@ -412,7 +465,8 @@ class TimePlot(QDialog):
                 self.ax[i].plot(self.xaxis,self.yaxes[i],c=colors[i],label=labels[i])
                 self.ax[i].tick_params(axis='y', colors=colors[i], labelsize='small',rotation=90)
                 self.ax[i].yaxis.set_major_locator(MaxNLocator(5))
-                self.ax[i].set_ylim(self.range_dict[labels[i]]['ymin'],self.range_dict[labels[i]]['ymax'])
+                if labels[i] in self.range_dict.keys():
+                    self.ax[i].set_ylim(self.range_dict[labels[i]]['ymin'],self.range_dict[labels[i]]['ymax'])
 
                 if i%2==0:
                     self.ax[i].yaxis.tick_left()
