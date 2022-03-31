@@ -4,6 +4,8 @@ import asyncio
 import io
 import pandas as pd
 from functools import reduce
+from urllib.request import urlopen
+
 
 async def set_once(con,drf_list,value_list,settings_role):
     settings = [None]*len(drf_list)
@@ -117,6 +119,13 @@ class phasescan:
         self.thread_dict = {}
         self.thread_lock=threading.Lock()
 
+        self.TORs = ['L:ATOR','L:BTOR','L:TO1IN','L:TO3IN','L:TO4IN','L:TO4OUT','L:TO5OUT',
+                     'L:D0TOR','L:D1TOR','L:D2TOR','L:D3TOR','L:D4TOR','L:D5TOR','L:D7TOR','L:TORSIS','L:TORSOS','L:TORMDS']
+        self.LMs = ['L:D00LM','L:D0VLM','L:D11LM','L:D12LM','L:D13LM','L:D14LM','L:D21LM','L:D22LM','L:D23LM','L:D24LM',
+                    'L:D31LM','L:D32LM','L:D33LM','L:D34LM','L:D41LM','L:D42LM','L:D43LM','L:D44LM',
+                    'L:D51LM','L:D52LM','L:D53LM','L:D54LM','L:D61LM','L:D62LM','L:D63LM','L:D64LM',
+                    'L:D71LM','L:D72LM','L:D73LM','L:D74LM','L:DELM1','L:DELM2','L:DELM3','L:DELM4','L:DELM5','L:DELM7','L:DELM9',]
+        
         self.main_dict = {'RFQ':{'device':'L:RFQPAH','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
                            'RFB':{'device':'L:RFBPAH','idx':2,'selected':False,'phase':0,'delta':0,'steps':2},
                            'Tank 1':{'device':'L:V1QSET','idx':3,'selected':False,'phase':0,'delta':0,'steps':2},
@@ -133,6 +142,8 @@ class phasescan:
         self.debug_role='testing'
         self.main_role='linac_daily_rf_tuning'
         self.role=self.main_role
+
+        self.dev_list = self.read_dev_list()
                 
     def swap_dict(self):
         if self.param_dict==self.main_dict:
@@ -142,6 +153,12 @@ class phasescan:
             self.param_dict=self.main_dict
             self.role=self.main_role
 
+    def read_dev_list(self):
+        URL='https://www-bd.fnal.gov/cgi-bin/acl.pl?acl=list/notitle/noheadings+name=L:%+"%nm"'
+        dev_list = urlopen(URL).read().decode()
+        dev_list = [i.strip() for i in dev_list.splitlines()]
+
+        return dev_list
             
     '''
     def _acnet_daq(self, thread_name):

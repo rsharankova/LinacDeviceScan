@@ -1,6 +1,6 @@
 from PyQt6.uic import loadUiType, loadUi
 from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QSpinBox, QDoubleSpinBox, QPlainTextEdit, QDialog, QComboBox, QHBoxLayout, QLabel, QPushButton
-from PyQt6.QtCore import Qt, QUuid, QRegularExpression
+from PyQt6.QtCore import Qt, QUuid, QRegularExpression#, QtLiterals
 from phasescan import phasescan
 
 import numpy as np
@@ -27,7 +27,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.event_comboBox.addItems(['default','15Hz','52','53','0a'])
         self.evt_dict = {'default':'','15Hz':'@p,15000','52':'@e,52,e,0','53':'@e,53,e,0','0a':'@e,0a,e,0'}
 
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(0)
         self.list_plainTextEdit.setPlainText('ramplist.csv')
         self.scan_plainTextEdit.setPlainText('devicescan.csv')
         self.read_plainTextEdit.setPlainText('Reading_devices.csv')
@@ -42,18 +42,39 @@ class Main(QMainWindow, Ui_MainWindow):
                 spinBox.valueChanged.connect(self.read_steps)
 
         self.debug_pushButton.toggled.connect(self.toggle_debug)
+        self.devP_pushButton.clicked.connect(self.toggle_page)
+        self.mainP_pushButton.clicked.connect(self.toggle_page)
 
+        self.selectall_pushButton_1.clicked.connect(self.select_all)
+        self.selectall_pushButton_2.clicked.connect(self.select_all)
+
+        self.clearall_pushButton_1.clicked.connect(self.clear_all)
+        self.clearall_pushButton_2.clicked.connect(self.clear_all)
+
+        self.populate_list()
+        
     def toggle_debug(self):
         if self.debug_pushButton.isChecked():
-            self.stackedWidget.setCurrentIndex(0)
+            self.stackedWidget.setCurrentIndex(2)
             self.phasescan.swap_dict()
             #print(self.phasescan.param_dict)
         else:
-            self.stackedWidget.setCurrentIndex(1)
+            self.stackedWidget.setCurrentIndex(0)
             self.phasescan.swap_dict()
             #print(self.phasescan.param_dict)
 
+    def toggle_page(self):
+        if self.stackedWidget.currentIndex()==0:
+            self.stackedWidget.setCurrentIndex(1)
+        else:       
+            self.stackedWidget.setCurrentIndex(0)
+
+    def populate_list(self):
+        print(self.phasescan.dev_list[0])
+        for dev in self.phasescan.dev_list:
+            self.listWidget.addItem(dev)
         
+
     def add_param(self):
         for key in self.phasescan.param_dict:
             for checkBox in self.findChildren(QCheckBox):
@@ -89,13 +110,20 @@ class Main(QMainWindow, Ui_MainWindow):
 
                     
     def select_all(self):
-        for checkBox in self.findChildren(QCheckBox):
-            checkBox.setChecked(True)
-
+        if self.stackedWidget.currentIndex()==0: 
+            [ checkBox.setChecked(True) for checkBox in self.findChildren(QCheckBox) if checkBox.objectName().find('main')!=-1 ]
+        elif self.stackedWidget.currentIndex()==1:
+            [ checkBox.setChecked(True) for checkBox in self.findChildren(QCheckBox) if checkBox.objectName().find('dev')!=-1 ]
+        else:
+            return None
             
     def clear_all(self):
-        for checkBox in self.findChildren(QCheckBox):
-            checkBox.setChecked(False)
+        if self.stackedWidget.currentIndex()==0: 
+            [ checkBox.setChecked(False) for checkBox in self.findChildren(QCheckBox) if checkBox.objectName().find('main')!=-1 ]
+        elif self.stackedWidget.currentIndex()==1:
+            [ checkBox.setChecked(False) for checkBox in self.findChildren(QCheckBox) if checkBox.objectName().find('dev')!=-1 ]
+        else:
+            return None
 
 
     def generate_ramp_list(self):
@@ -187,17 +215,16 @@ class Main(QMainWindow, Ui_MainWindow):
 
     def barLosses(self):
         evt = self.event_comboBox.currentText()
-        selected = [self.listWidget.item(i).text() for i in range(self.listWidget.count()) if self.listWidget.item(i).text().find('LM')!=-1
-                    and self.listWidget.item(i).text().find('LMSM')==-1]
-        selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in selected]
+        #selected = [self.listWidget.item(i).text() for i in range(self.listWidget.count()) if self.listWidget.item(i).text().find('LM')!=-1
+        #            and self.listWidget.item(i).text().find('LMSM')==-1]
+        selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in self.phasescan.LMs]
         if len(selected)>0:
             dlg = BarPlot(selected,evt,'loss',self)
             dlg.show()
         
     def barTors(self):
         evt = self.event_comboBox.currentText()
-        selected = [self.listWidget.item(i).text() for i in range(self.listWidget.count()) if self.listWidget.item(i).text().find('TO')!=-1]
-        selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in selected]
+        selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in self.phasescan.TORs]
         if len(selected)>0:
             dlg = BarPlot(selected,evt,'current',self)
             dlg.show()
@@ -251,7 +278,7 @@ class TimePlot(QDialog):
         self.plot_pushButton.clicked.connect(self.toggle_plot)
 
         self.close_pushButton=QPushButton('Close')
-        self.close_pushButton.clicked.connect(self.close)
+        self.close_pushButton.clicked.connect(self.close_dialog)
         
         self.hLayout2 = QHBoxLayout()
         self.hLayout2.addWidget(self.eventLabel)
@@ -262,6 +289,10 @@ class TimePlot(QDialog):
         self.setLayout(self.gridLayout)
         self.init_plot()
 
+    def close_dialog(self):
+        if self.thread in self.parent().phasescan.get_list_of_threads():
+            self.parent().phasescan.stop_thread('%s'%self.thread)
+        self.close()
 
         
     def init_plot(self):
@@ -279,7 +310,6 @@ class TimePlot(QDialog):
         
     def set_range(self):
         self.range_dict.update({self.comboBox.currentText():{'ymin':self.min_doubleSpinBox.value(),'ymax':self.max_doubleSpinBox.value()}})
-        #print(self.range_dict)
         
     def toggle_plot(self):
         if self.plot_pushButton.isChecked() and len(self.selected)>0:
@@ -363,7 +393,7 @@ class BarPlot(QDialog):
         self.plot_pushButton.clicked.connect(self.toggle_plot)
 
         self.close_pushButton=QPushButton('Close')
-        self.close_pushButton.clicked.connect(self.close)
+        self.close_pushButton.clicked.connect(self.close_dialog)
         
         self.hLayout = QHBoxLayout()
         self.hLayout.addWidget(self.eventLabel)
@@ -375,7 +405,11 @@ class BarPlot(QDialog):
 
         self.init_plot()
 
-        
+    def close_dialog(self):
+        if self.thread in self.parent().phasescan.get_list_of_threads():
+            self.parent().phasescan.stop_thread('%s'%self.thread)
+        self.close()
+            
     def init_plot(self):
         self.fig = Figure()
         self.ax = self.fig.add_subplot(111)
