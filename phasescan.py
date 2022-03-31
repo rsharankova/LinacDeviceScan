@@ -5,7 +5,8 @@ import io
 import pandas as pd
 from functools import reduce
 from urllib.request import urlopen
-
+import re
+import sys
 
 async def set_once(con,drf_list,value_list,settings_role):
     settings = [None]*len(drf_list)
@@ -156,7 +157,8 @@ class phasescan:
     def read_dev_list(self):
         URL='https://www-bd.fnal.gov/cgi-bin/acl.pl?acl=list/notitle/noheadings+name=L:%+"%nm"'
         dev_list = urlopen(URL).read().decode()
-        dev_list = [i.strip() for i in dev_list.splitlines()]
+        devfilt=re.compile("^L:[a-zA-Z].*")
+        dev_list=[dev.strip() for dev in dev_list.splitlines() if devfilt.match(dev)]
 
         return dev_list
             

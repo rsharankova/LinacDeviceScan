@@ -1,6 +1,6 @@
 from PyQt6.uic import loadUiType, loadUi
 from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QSpinBox, QDoubleSpinBox, QPlainTextEdit, QDialog, QComboBox, QHBoxLayout, QLabel, QPushButton
-from PyQt6.QtCore import Qt, QUuid, QRegularExpression#, QtLiterals
+from PyQt6.QtCore import Qt, QUuid, QRegularExpression,QSortFilterProxyModel, QAbstractTableModel
 from phasescan import phasescan
 
 import numpy as np
@@ -13,6 +13,30 @@ from matplotlib.ticker import MaxNLocator
 from matplotlib.backends.backend_qtagg import (
     FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
+
+
+class TableModel(QAbstractTableModel):
+    def __init__(self, data):
+        super().__init__()
+        self._data = [[dev] for dev in data]
+        self._data=sorted(self._data)
+    def data(self, index, role):
+        if role == Qt.ItemDataRole.DisplayRole:
+            return self._data[index.row()][index.column()]
+
+    def rowCount(self, index):
+        return len(self._data)
+
+    def columnCount(self, index):
+        return len(self._data[0])
+
+    def removeRow(self,index):
+        del self._data[index]
+
+    def addRow(self,value):
+        self._data.append([value])
+        self._data=sorted(self._data)
+
 
 Ui_MainWindow, QMainWindow = loadUiType('gui_window.ui')
 
@@ -27,6 +51,19 @@ class Main(QMainWindow, Ui_MainWindow):
         self.event_comboBox.addItems(['default','15Hz','52','53','0a'])
         self.evt_dict = {'default':'','15Hz':'@p,15000','52':'@e,52,e,0','53':'@e,53,e,0','0a':'@e,0a,e,0'}
 
+        self.model = TableModel(self.phasescan.dev_list)
+        self.proxy_model = QSortFilterProxyModel()
+        self.proxy_model.setFilterKeyColumn(-1)  
+        self.proxy_model.setSourceModel(self.model)
+        #self.proxy_model.sort(0, Qt.SortOrder.AscendingOrder)
+
+        self.table.setShowGrid(False) 
+        self.table.setModel(self.proxy_model)
+        self.table.horizontalHeader().hide()
+        self.table.verticalHeader().hide()
+        self.table.verticalHeader().setDefaultSectionSize(20)
+        self.table.horizontalHeader().setDefaultSectionSize(20)
+        
         self.stackedWidget.setCurrentIndex(0)
         self.list_plainTextEdit.setPlainText('ramplist.csv')
         self.scan_plainTextEdit.setPlainText('devicescan.csv')
@@ -51,7 +88,36 @@ class Main(QMainWindow, Ui_MainWindow):
         self.clearall_pushButton_1.clicked.connect(self.clear_all)
         self.clearall_pushButton_2.clicked.connect(self.clear_all)
 
-        self.populate_list()
+        self.add_pushButton.clicked.connect(self.add_device)
+        self.remove_pushButton.clicked.connect(self.remove_device)
+        
+        #self.populate_list()
+
+    def add_device(self):
+
+        tx=self.searchbar.text()
+        self.searchbar.setText("")
+        rows = sorted(set(index.row() for index in
+                      self.table.selectedIndexes()))
+
+        for dev in self.table.selectedIndexes():
+            self.listWidget.addItem(dev.data())
+
+        for row in sorted(rows, reverse=True):
+            self.model.removeRow(row)
+
+        self.searchbar.setText("Start typing device name")
+        self.searchbar.setText(tx)
+
+    def remove_device(self):
+
+        for dev in self.listWidget.selectedItems():
+            self.model.addRow(dev.text())
+            self.listWidget.takeItem(self.listWidget.row(dev))
+        tx=self.searchbar.text()
+        self.searchbar.setText("Start typing device name")
+        self.searchbar.setText(tx)
+
         
     def toggle_debug(self):
         if self.debug_pushButton.isChecked():
