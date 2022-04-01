@@ -1543,22 +1543,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>stopScan_pushButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>display_scan_results()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>653</x>
-     <y>376</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>482</x>
-     <y>317</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>writeScan_pushButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>

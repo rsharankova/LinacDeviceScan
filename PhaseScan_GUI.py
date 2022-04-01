@@ -111,11 +111,13 @@ class Main(QMainWindow, Ui_MainWindow):
 
         self.bar_pushButton.clicked.connect(self.bar)
 
+        self.removeDevice_pushButton.setEnabled(False)
         self.addDevice_pushButton.clicked.connect(self.add_device)
         self.removeDevice_pushButton.setEnabled(False)
         self.stackedWidget.currentChanged.connect(self.removeDevice_pushButton.setEnabled)
         self.removeDevice_pushButton.clicked.connect(self.remove_device)
-        
+
+        self.stopScan_pushButton.clicked.connect(self.stop_scan)
         #self.populate_list()
 
     def add_device(self):
@@ -172,6 +174,9 @@ class Main(QMainWindow, Ui_MainWindow):
         if self.debug_pushButton.isChecked():
             self.stackedWidget.setCurrentIndex(2)
             self.phasescan.swap_dict()
+            self.listWidget.addItem('Z:CUBE_X')
+            self.listWidget.addItem('Z:CUBE_Y')
+            self.listWidget.addItem('Z:CUBE_Z')
             #print(self.phasescan.param_dict)
         else:
             self.stackedWidget.setCurrentIndex(0)
@@ -294,6 +299,10 @@ class Main(QMainWindow, Ui_MainWindow):
                 self.phasescan.apply_settings(self.ramplist,self.read_list,self.evt_dict[evt],self.thread,self.scanresults)   
             except:
                 print('Scan failed')
+
+    def stop_scan(self):
+        if self.thread in self.phasescan.get_list_of_threads():
+            self.phasescan.stop_thread('%s'%self.thread)
                 
     def display_scan_results(self):
         for line in self.scanresults:
