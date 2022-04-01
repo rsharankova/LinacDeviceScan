@@ -1,6 +1,7 @@
 from PyQt6.uic import loadUiType, loadUi
-from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QSpinBox, QDoubleSpinBox, QPlainTextEdit, QDialog, QComboBox, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, QPushButton
-from PyQt6.QtCore import Qt, QUuid, QRegularExpression,QSortFilterProxyModel, QAbstractTableModel
+from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QSpinBox, QDoubleSpinBox,QPlainTextEdit, QDialog, QComboBox, QCompleter, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, QPushButton
+from PyQt6.QtCore import Qt, QUuid, QRegularExpression,QSortFilterProxyModel
+from PyQt6.QtGui import QStandardItemModel,QStandardItem
 from phasescan import phasescan
 
 import numpy as np
@@ -15,31 +16,54 @@ from matplotlib.backends.backend_qtagg import (
     NavigationToolbar2QT as NavigationToolbar)
 
 
-class TableModel(QAbstractTableModel):
-    def __init__(self, data):
+
+class ItemModel(QStandardItemModel):
+    def __init__(self,data):
         super().__init__()
         self._data = [[dev] for dev in data]
         self._data=sorted(self._data)
+        for i,word in enumerate(data):
+            item = QStandardItem(word)
+            self.setItem(i, 0, item)
+
+
+class ExtendedCombo( QComboBox ):
+    def __init__( self,  parent = None):
+        super( ExtendedCombo, self ).__init__( parent )
+
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus )
+        self.setEditable( True )
+        self.completer = QCompleter( self )
+
+        # always show all completions
+        self.completer.setCompletionMode( QCompleter.CompletionMode.UnfilteredPopupCompletion )
+        self.proxy_model = QSortFilterProxyModel( self )
+        self.proxy_model.setFilterCaseSensitivity( Qt.CaseSensitivity.CaseInsensitive )
+
+        self.setCompleter( self.completer )
+
+        self.lineEdit().textEdited[str].connect( self.proxy_model.setFilterFixedString )
+        self.completer.activated.connect(self.setTextIfCompleterIsClicked)
+
+    def setModel( self, model ):
+        super(ExtendedCombo, self).setModel( model )
+        self.proxy_model.setSourceModel( model )
+        self.completer.setModel(self.proxy_model)
+
+    def setModelColumn( self, column ):
+        self.completer.setCompletionColumn( column )
+        self.proxy_model.setFilterKeyColumn( column )
+        super(ExtendedCombo, self).setModelColumn( column )
+
+    def index( self ):
+        return self.currentIndex()
+
+    def setTextIfCompleterIsClicked(self, text):
+      if text:
+        index = self.findText(text)
+        self.setCurrentIndex(index)
+
         
-    def data(self, index, role):
-        if role == Qt.ItemDataRole.DisplayRole:
-            return self._data[index.row()][index.column()]
-
-    def rowCount(self, index):
-        return len(self._data)
-
-    def columnCount(self, index):
-        return len(self._data[0])
-
-    def removeRow(self,index):
-        del self._data[index]
-
-    def addRow(self,value):
-        self._data.append([value])
-        self._data=sorted(self._data)
-
-
-                                                                          
 Ui_MainWindow, QMainWindow = loadUiType('gui_window.ui')
 
 class Main(QMainWindow, Ui_MainWindow):
@@ -53,7 +77,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.event_comboBox.addItems(['default','15Hz','52','53','0a'])
         self.evt_dict = {'default':'','15Hz':'@p,15000','52':'@e,52,e,0','53':'@e,53,e,0','0a':'@e,0a,e,0'}
 
-        self.model = TableModel(self.phasescan.dev_list)
+        self.model = ItemModel(self.phasescan.dev_list)
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setFilterKeyColumn(-1)  
         self.proxy_model.setSourceModel(self.model)
@@ -67,6 +91,12 @@ class Main(QMainWindow, Ui_MainWindow):
         self.table.verticalHeader().setDefaultSectionSize(20)
         self.table.horizontalHeader().setDefaultSectionSize(200)
 
+        self.searchbar.textChanged.connect(self.proxy_model.setFilterFixedString)
+
+        self.dev_comboBox_8 = ExtendedCombo()
+        self.dev_comboBox_8.setModel(self.model)
+        self.dev_comboBox_8.setModelColumn(0)
+        
         dev_gridLayout = QGridLayout()
         dev_gridLayout.addWidget(self.selectall_pushButton_2,0,1,1,1)
         dev_gridLayout.addWidget(self.clearall_pushButton_2,0,2,1,1)
@@ -107,8 +137,6 @@ class Main(QMainWindow, Ui_MainWindow):
         self.add_pushButton.clicked.connect(self.add_list_item)
         self.remove_pushButton.clicked.connect(self.remove_list_item)
 
-        self.searchbar.textChanged.connect(self.proxy_model.setFilterFixedString)
-
         self.genList_pushButton.clicked.connect(self.generate_ramp_list)
         self.displayList_pushButton.clicked.connect(self.display_list)
         self.writeList_pushButton.clicked.connect(self.write_list)
@@ -142,8 +170,10 @@ class Main(QMainWindow, Ui_MainWindow):
         checkBox.setText('')
         self.dev_groupBox.layout().addWidget(checkBox,row,0,1,1)
 
-        comboBox = QComboBox()
+        comboBox = ExtendedCombo()
         comboBox.setObjectName('dev_comboBox_%d'%num)
+        comboBox.setModel(self.model)
+        comboBox.setModelColumn(0)
         self.dev_groupBox.layout().addWidget(comboBox,row,1,1,1)
 
         doubleSpinBox = QDoubleSpinBox()
@@ -399,7 +429,10 @@ class Main(QMainWindow, Ui_MainWindow):
 class TimePlot(QDialog):
     def __init__(self, selected,evt,parent=None):
         super().__init__(parent)
-        loadUi("expandPlot.ui", self)
+        #loadUi("expandPlot.ui", self)
+
+        self.setWindowTitle("Time plot")
+        self.resize(930,550)
 
         self.thread = QUuid.createUuid().toString()
         self.selected = selected
@@ -414,6 +447,7 @@ class TimePlot(QDialog):
         self.hLayout0 = QHBoxLayout()
         self.hLayout0.addWidget(self.comboBox)
         self.hLayout0.addWidget(self.setRange_pushButton)
+        self.gridLayout = QGridLayout()
         self.gridLayout.addLayout(self.hLayout0,0,0)
 
         self.min_doubleSpinBox = QDoubleSpinBox()
@@ -545,8 +579,11 @@ class BarPlot(QDialog):
     """Bar plot."""
     def __init__(self, selected, evt, style='',parent=None):
         super().__init__(parent)
-        loadUi("expandPlot.ui", self)
+        #loadUi("expandPlot.ui", self)
 
+        self.setWindowTitle("Bar plot")
+        self.resize(930,550)
+        
         self.thread = QUuid.createUuid().toString()
         self.selected = selected
         self.first = True
@@ -570,6 +607,7 @@ class BarPlot(QDialog):
         self.hLayout.addWidget(self.eventLabel)
         self.hLayout.addWidget(self.plot_pushButton)
         self.hLayout.addWidget(self.close_pushButton)
+        self.gridLayout = QGridLayout()
         self.gridLayout.addLayout(self.hLayout,1,0)
 
         self.setLayout(self.gridLayout)
