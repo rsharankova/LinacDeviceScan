@@ -109,15 +109,28 @@ class Main(QMainWindow, Ui_MainWindow):
 
         self.searchbar.textChanged.connect(self.proxy_model.setFilterFixedString)
 
-        self.bar_pushButton.clicked.connect(self.bar)
+        self.genList_pushButton.clicked.connect(self.generate_ramp_list)
+        self.displayList_pushButton.clicked.connect(self.display_list)
+        self.writeList_pushButton.clicked.connect(self.write_list)
 
-        self.removeDevice_pushButton.setEnabled(False)
+        self.timeplot_pushButton.clicked.connect(self.timePlot)
+        self.loss_pushButton.clicked.connect(self.barLosses)
+        self.current_pushButton.clicked.connect(self.barTors)
+        self.barplot_pushButton.clicked.connect(self.barPlot)
+
+        self.addDevice_pushButton.setEnabled(False)
+        self.stackedWidget.currentChanged.connect(self.addDevice_pushButton.setEnabled)
         self.addDevice_pushButton.clicked.connect(self.add_device)
         self.removeDevice_pushButton.setEnabled(False)
         self.stackedWidget.currentChanged.connect(self.removeDevice_pushButton.setEnabled)
         self.removeDevice_pushButton.clicked.connect(self.remove_device)
 
+        self.startScan_pushButton.clicked.connect(self.start_scan)
         self.stopScan_pushButton.clicked.connect(self.stop_scan)
+        self.pauseScan_pushButton.clicked.connect(self.pause_scan)
+        self.resumeScan_pushButton.clicked.connect(self.resume_scan)
+        self.writeScan_pushButton.clicked.connect(self.write_scan_results)
+        
         #self.populate_list()
 
     def add_device(self):
@@ -143,6 +156,18 @@ class Main(QMainWindow, Ui_MainWindow):
         
     def remove_device(self):
         print('blip blop')
+        num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')==-1]))
+        if num<=8:
+            return None
+        
+        objs = ['dev_checkBox','dev_comboBox','doubleSpinBox','steps_spinBox']
+        objs = ['%s_%d'%(obj,num) for obj in objs]
+        classes = [QCheckBox,QComboBox,QDoubleSpinBox,QSpinBox]
+
+        child = [self.findChild(cl,ob) for cl,ob in zip(classes,objs)]
+        for i,c in enumerate(child):
+            if isinstance(c,classes[i]):
+                print(c.objectName())
         
     def add_list_item(self):
 
@@ -177,11 +202,14 @@ class Main(QMainWindow, Ui_MainWindow):
             self.listWidget.addItem('Z:CUBE_X')
             self.listWidget.addItem('Z:CUBE_Y')
             self.listWidget.addItem('Z:CUBE_Z')
-            #print(self.phasescan.param_dict)
+
         else:
             self.stackedWidget.setCurrentIndex(0)
             self.phasescan.swap_dict()
-            #print(self.phasescan.param_dict)
+            for i in reversed(range(self.listWidget.count())):
+                if self.listWidget.item(i).text().find('Z:')!=-1:
+                    self.listWidget.takeItem(i)
+
 
     def toggle_page(self):
         if self.stackedWidget.currentIndex()==0:
@@ -287,7 +315,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.read_list = self.phasescan.readList(filename)
         
             
-    def scan(self):
+    def start_scan(self):
         numevents = self.numevents_spinBox.value()
         evt = self.event_comboBox.currentText()
         self.reading()
@@ -303,7 +331,14 @@ class Main(QMainWindow, Ui_MainWindow):
     def stop_scan(self):
         if self.thread in self.phasescan.get_list_of_threads():
             self.phasescan.stop_thread('%s'%self.thread)
-                
+
+    def pause_scan(self):
+        print('Not implemented yet')
+
+    def resume_scan(self):
+        print('Not implemented yet')
+
+        
     def display_scan_results(self):
         for line in self.scanresults:
             #print(','.join([str(l) for l in line]))
@@ -321,14 +356,14 @@ class Main(QMainWindow, Ui_MainWindow):
             print('Something went wrong',e)
 
 
-    def expandMon(self):
+    def timePlot(self):
         evt = self.event_comboBox.currentText()
         selected = ['%s%s'%(item.text(),self.evt_dict[evt]) for item in self.listWidget.selectedItems()]
         if len(selected)>0:
             dlg = TimePlot(selected,evt,self)
             dlg.show()
 
-    def expandPhase(self):
+    def plotPhase(self):
         evt = self.event_comboBox.currentText()
         selected = [ self.phasescan.param_dict[key]['device'] for key in self.phasescan.param_dict if self.phasescan.param_dict[key]['selected']==True]
         selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in selected]
@@ -336,7 +371,7 @@ class Main(QMainWindow, Ui_MainWindow):
             dlg = TimePlot(selected,evt,self)
             dlg.show()
 
-    def bar(self):
+    def barPlot(self):
         evt = self.event_comboBox.currentText()
         selected = ['%s%s'%(item.text(),self.evt_dict[evt]) for item in self.listWidget.selectedItems()]
         if len(selected)>0:
@@ -421,6 +456,10 @@ class TimePlot(QDialog):
         if self.thread in self.parent().phasescan.get_list_of_threads():
             self.parent().phasescan.stop_thread('%s'%self.thread)
         self.close()
+
+    def closeEvent(self, event):
+        self.close_dialog()
+        event.accept()
 
         
     def init_plot(self):
@@ -538,7 +577,11 @@ class BarPlot(QDialog):
         if self.thread in self.parent().phasescan.get_list_of_threads():
             self.parent().phasescan.stop_thread('%s'%self.thread)
         self.close()
-            
+
+    def closeEvent(self, event):
+        self.close_dialog()
+        event.accept()
+        
     def init_plot(self):
         self.fig = Figure()
         self.ax = self.fig.add_subplot(111)

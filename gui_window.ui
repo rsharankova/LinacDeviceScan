@@ -204,7 +204,7 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QPushButton" name="pause_pushButton">
+      <widget class="QPushButton" name="pauseScan_pushButton">
        <property name="text">
         <string>Pause scan</string>
        </property>
@@ -306,14 +306,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="expand_pushButton">
+      <widget class="QPushButton" name="timeplot_pushButton">
        <property name="text">
         <string>Time plot</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="bar_pushButton">
+      <widget class="QPushButton" name="barplot_pushButton">
        <property name="text">
         <string>Bar plot</string>
        </property>
@@ -427,7 +427,7 @@
          <item row="0" column="3">
           <widget class="QPushButton" name="devP_pushButton">
            <property name="text">
-            <string>Other</string>
+            <string>Other device</string>
            </property>
            <property name="checkable">
             <bool>false</bool>
@@ -930,12 +930,12 @@
         <rect>
          <x>226</x>
          <y>15</y>
-         <width>71</width>
+         <width>91</width>
          <height>32</height>
         </rect>
        </property>
        <property name="text">
-        <string>Main</string>
+        <string>Main page</string>
        </property>
        <property name="checkable">
         <bool>false</bool>
@@ -1078,7 +1078,7 @@
         <rect>
          <x>232</x>
          <y>88</y>
-         <width>54</width>
+         <width>71</width>
          <height>24</height>
         </rect>
        </property>
@@ -1116,18 +1116,6 @@
          <width>90</width>
          <height>30</height>
         </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>90</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>80</width>
-         <height>30</height>
-        </size>
        </property>
       </widget>
      </widget>
@@ -1397,41 +1385,47 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
+   <widget class="QPushButton" name="removeDevice_pushButton">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>210</x>
       <y>370</y>
-      <width>312</width>
+      <width>117</width>
       <height>32</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QPushButton" name="debug_pushButton">
-       <property name="text">
-        <string>Debug</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="addDevice_pushButton">
-       <property name="text">
-        <string>Add line</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="removeDevice_pushButton">
-       <property name="text">
-        <string>Remove line</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <property name="text">
+     <string>Remove row</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="addDevice_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>370</y>
+      <width>93</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add row</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="debug_pushButton">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>370</y>
+      <width>82</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Debug</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -1446,180 +1440,6 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <tabstops>
-  <tabstop>listWidget</tabstop>
-  <tabstop>selectall_pushButton_1</tabstop>
-  <tabstop>clearall_pushButton_1</tabstop>
-  <tabstop>doubleSpinBox_1</tabstop>
-  <tabstop>doubleSpinBox_2</tabstop>
-  <tabstop>doubleSpinBox_3</tabstop>
-  <tabstop>doubleSpinBox_4</tabstop>
-  <tabstop>doubleSpinBox_5</tabstop>
-  <tabstop>doubleSpinBox_6</tabstop>
-  <tabstop>doubleSpinBox_7</tabstop>
-  <tabstop>steps_spinBox_1</tabstop>
-  <tabstop>steps_spinBox_2</tabstop>
-  <tabstop>steps_spinBox_3</tabstop>
-  <tabstop>steps_spinBox_4</tabstop>
-  <tabstop>steps_spinBox_5</tabstop>
-  <tabstop>steps_spinBox_6</tabstop>
-  <tabstop>steps_spinBox_7</tabstop>
-  <tabstop>oneD_radioButton</tabstop>
-  <tabstop>nD_radioButton</tabstop>
-  <tabstop>numevents_spinBox</tabstop>
-  <tabstop>genList_pushButton</tabstop>
-  <tabstop>displayList_pushButton</tabstop>
-  <tabstop>writeList_pushButton</tabstop>
-  <tabstop>list_plainTextEdit</tabstop>
-  <tabstop>startScan_pushButton</tabstop>
-  <tabstop>stopScan_pushButton</tabstop>
-  <tabstop>writeScan_pushButton</tabstop>
-  <tabstop>scan_plainTextEdit</tabstop>
- </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>genList_pushButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>generate_ramp_list()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>436</x>
-     <y>310</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>398</x>
-     <y>317</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>displayList_pushButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>display_list()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>653</x>
-     <y>332</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>398</x>
-     <y>317</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>writeList_pushButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>write_list()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>791</x>
-     <y>332</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>398</x>
-     <y>317</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>startScan_pushButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>scan()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>400</x>
-     <y>362</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>438</x>
-     <y>330</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>writeScan_pushButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>write_scan_results()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>791</x>
-     <y>376</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>482</x>
-     <y>317</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>expand_pushButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>expandMon()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>712</x>
-     <y>208</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>541</x>
-     <y>322</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>loss_pushButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>barLosses()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>661</x>
-     <y>166</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>518</x>
-     <y>210</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>current_pushButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>barTors()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>651</x>
-     <y>119</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>518</x>
-     <y>210</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
- <slots>
-  <slot>add_param()</slot>
-  <slot>select_all()</slot>
-  <slot>clear_all()</slot>
-  <slot>generate_ramp_list()</slot>
-  <slot>display_list()</slot>
-  <slot>write_list()</slot>
-  <slot>scan()</slot>
-  <slot>write_scan_results()</slot>
-  <slot>display_scan_results()</slot>
-  <slot>expandPhase()</slot>
-  <slot>expandMon()</slot>
-  <slot>barLosses()</slot>
-  <slot>barTors()</slot>
- </slots>
+ <connections/>
 </ui>
