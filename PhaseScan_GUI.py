@@ -134,9 +134,9 @@ class Main(QMainWindow, Ui_MainWindow):
         #self.populate_list()
 
     def add_device(self):
-        num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')==-1]))
+        num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')==-1])+1)
         row = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('dev')!=-1]))+2
-        print(num,row)
+
         checkBox = QCheckBox()
         checkBox.setObjectName('dev_checkBox_%d'%num)
         checkBox.setText('')
@@ -153,13 +153,14 @@ class Main(QMainWindow, Ui_MainWindow):
         stepsSpinBox = QSpinBox()
         stepsSpinBox.setObjectName('steps_spinBox_%d'%num)
         self.dev_groupBox.layout().addWidget(stepsSpinBox,row,3,1,1)
+
+        #print(checkBox.objectName())
         
     def remove_device(self):
-        print('blip blop')
         num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')==-1]))
         if num<=8:
             return None
-        
+
         objs = ['dev_checkBox','dev_comboBox','doubleSpinBox','steps_spinBox']
         objs = ['%s_%d'%(obj,num) for obj in objs]
         classes = [QCheckBox,QComboBox,QDoubleSpinBox,QSpinBox]
@@ -167,7 +168,9 @@ class Main(QMainWindow, Ui_MainWindow):
         child = [self.findChild(cl,ob) for cl,ob in zip(classes,objs)]
         for i,c in enumerate(child):
             if isinstance(c,classes[i]):
-                print(c.objectName())
+                #print(c.objectName())
+                c.deleteLater()
+                c = None
         
     def add_list_item(self):
 
