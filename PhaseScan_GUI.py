@@ -77,6 +77,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.event_comboBox.addItems(['default','15Hz','52','53','0a'])
         self.evt_dict = {'default':'','15Hz':'@p,15000','52':'@e,52,e,0','53':'@e,53,e,0','0a':'@e,0a,e,0'}
 
+        #### FILTER ENTRY MODEL ####
         self.model = ItemModel(self.phasescan.dev_list)
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setFilterKeyColumn(-1)  
@@ -84,6 +85,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.proxy_model.setFilterCaseSensitivity( Qt.CaseSensitivity.CaseInsensitive )
         #self.proxy_model.sort(0, Qt.SortOrder.AscendingOrder)
 
+        #### TABLE SEARCH ####
         self.table.setShowGrid(False) 
         self.table.setModel(self.proxy_model)
         self.table.horizontalHeader().hide()
@@ -93,10 +95,28 @@ class Main(QMainWindow, Ui_MainWindow):
 
         self.searchbar.textChanged.connect(self.proxy_model.setFilterFixedString)
 
+        #### LAYOUTS ####
         self.dev_comboBox_8 = ExtendedCombo()
         self.dev_comboBox_8.setModel(self.model)
         self.dev_comboBox_8.setModelColumn(0)
-        
+
+        ### DEBUG PAGE ###
+        debug_gridLayout = QGridLayout()
+        debug_gridLayout.addWidget(self.label_7,0,0,1,1)
+        debug_gridLayout.addWidget(self.label_8,0,1,1,1)
+        debug_gridLayout.addWidget(self.label_9,0,2,1,1)
+        #debug_gridLayout.addWidget(self.cube_comboBox_1,2,1,1,1)
+        debug_gridLayout.addWidget(self.cube_checkBox_1,1,0,1,1)
+        debug_gridLayout.addWidget(self.cube_doubleSpinBox_1,1,1,1,1)
+        debug_gridLayout.addWidget(self.cube_steps_spinBox_1,1,2,1,1)
+        debug_gridLayout.addWidget(self.cube_checkBox_2,2,0,1,1)
+        debug_gridLayout.addWidget(self.cube_doubleSpinBox_2,2,1,1,1)
+        debug_gridLayout.addWidget(self.cube_steps_spinBox_2,2,2,1,1)
+        debug_gridLayout.addWidget(self.cube_checkBox_3,3,0,1,1)
+        debug_gridLayout.addWidget(self.cube_doubleSpinBox_3,3,1,1,1)
+        debug_gridLayout.addWidget(self.cube_steps_spinBox_3,3,2,1,1)
+        self.cube_groupBox.setLayout(debug_gridLayout)
+        ### OTHER DEVICES PAGE###
         dev_gridLayout = QGridLayout()
         dev_gridLayout.addWidget(self.selectall_pushButton_2,0,1,1,1)
         dev_gridLayout.addWidget(self.clearall_pushButton_2,0,2,1,1)
@@ -109,43 +129,78 @@ class Main(QMainWindow, Ui_MainWindow):
         dev_gridLayout.addWidget(self.doubleSpinBox_8,2,2,1,1)
         dev_gridLayout.addWidget(self.steps_spinBox_8,2,3,1,1)
         self.dev_groupBox.setLayout(dev_gridLayout)
+        ### MAIN PAGE ###
+        main_gridLayout = QGridLayout()
+        main_gridLayout.addWidget(self.selectall_pushButton_1,0,1,1,1)
+        main_gridLayout.addWidget(self.clearall_pushButton_1,0,2,1,1)
+        main_gridLayout.addWidget(self.devP_pushButton,0,3,1,1)
+        main_gridLayout.addWidget(self.label_1,1,1,1,1)
+        main_gridLayout.addWidget(self.label_2,1,2,1,1)
+        main_gridLayout.addWidget(self.label_3,1,3,1,1)
+
+        objects = ['main_checkBox','dev_comboBox','doubleSpinBox','steps_spinBox']
+        classes = [QCheckBox,QComboBox,QDoubleSpinBox,QSpinBox]
         
+        for i in range(1,8):
+            objs = ['%s_%d'%(obj,i) for obj in objects]
+            children = [self.findChild(cl,ob) for cl,ob in zip(classes,objs)]
+            for j,c in enumerate(children):
+                if isinstance(c,classes[j]):
+                    main_gridLayout.addWidget(c,1+i,j,1,1)
+        
+        self.main_groupBox.setLayout(main_gridLayout)
+
+
+        #### DEFAULTS ####
         self.stackedWidget.setCurrentIndex(0)
         self.list_plainTextEdit.setPlainText('ramplist.csv')
         self.scan_plainTextEdit.setPlainText('devicescan.csv')
         self.read_plainTextEdit.setPlainText('Reading_devices.csv')
-        
+
+        #### BOX TOGGLE ACTIONS ####
         for checkBox in self.findChildren(QCheckBox):
             checkBox.toggled.connect(self.add_param)
         for dspinBox in self.findChildren(QDoubleSpinBox):
             dspinBox.valueChanged.connect(self.read_deltas)
-
         for spinBox in self.findChildren(QSpinBox):
             if spinBox.objectName().find('steps')!=-1:
                 spinBox.valueChanged.connect(self.read_steps)
 
-        self.debug_pushButton.toggled.connect(self.toggle_debug)
-        self.devP_pushButton.clicked.connect(self.toggle_page)
-        self.mainP_pushButton.clicked.connect(self.toggle_page)
-
+        #### BUTTON ACTIONS ####
+        ### SELECT/CLEAR ALL BUTTONS ###
         self.selectall_pushButton_1.clicked.connect(self.select_all)
         self.selectall_pushButton_2.clicked.connect(self.select_all)
-
         self.clearall_pushButton_1.clicked.connect(self.clear_all)
         self.clearall_pushButton_2.clicked.connect(self.clear_all)
 
+        ### DEVICE LIST FOR PLOTS ###
         self.add_pushButton.clicked.connect(self.add_list_item)
         self.remove_pushButton.clicked.connect(self.remove_list_item)
 
+        ### RAMP LIST BUTTONS ###
         self.genList_pushButton.clicked.connect(self.generate_ramp_list)
         self.displayList_pushButton.clicked.connect(self.display_list)
         self.writeList_pushButton.clicked.connect(self.write_list)
 
+        ### PLOT BUTTONS ###
         self.timeplot_pushButton.clicked.connect(self.timePlot)
         self.loss_pushButton.clicked.connect(self.barLosses)
         self.current_pushButton.clicked.connect(self.barTors)
         self.barplot_pushButton.clicked.connect(self.barPlot)
 
+        ### SCAN BUTTONS ###
+        self.startScan_pushButton.clicked.connect(self.start_scan)
+        self.stopScan_pushButton.clicked.connect(self.stop_scan)
+        self.pauseScan_pushButton.clicked.connect(self.pause_scan)
+        self.resumeScan_pushButton.clicked.connect(self.resume_scan)
+        self.writeScan_pushButton.clicked.connect(self.write_scan_results)
+
+        ### STACKED WIDGET BUTTONS ###
+        self.debug_pushButton.toggled.connect(self.toggle_debug)
+        self.devP_pushButton.clicked.connect(self.toggle_page)
+        self.mainP_pushButton.clicked.connect(self.toggle_page)
+
+        ### ADD/REMOVE ROW BUTTONS ###
         self.addDevice_pushButton.setEnabled(False)
         self.stackedWidget.currentChanged.connect(self.addDevice_pushButton.setEnabled)
         self.addDevice_pushButton.clicked.connect(self.add_device)
@@ -153,14 +208,19 @@ class Main(QMainWindow, Ui_MainWindow):
         self.stackedWidget.currentChanged.connect(self.removeDevice_pushButton.setEnabled)
         self.removeDevice_pushButton.clicked.connect(self.remove_device)
 
-        self.startScan_pushButton.clicked.connect(self.start_scan)
-        self.stopScan_pushButton.clicked.connect(self.stop_scan)
-        self.pauseScan_pushButton.clicked.connect(self.pause_scan)
-        self.resumeScan_pushButton.clicked.connect(self.resume_scan)
-        self.writeScan_pushButton.clicked.connect(self.write_scan_results)
-        
-        #self.populate_list()
+        #### FONTS #####
+        font13 =self.label_13.font()
+        font13.setPointSize(16)
+        font13.setBold(True)
+        self.label_13.setFont(font13)
 
+        font14 =self.label_14.font()
+        font14.setPointSize(16)
+        font14.setBold(True)
+        self.label_14.setFont(font14)
+        
+
+    #### CLASS FUNCTIONS ####
     def add_device(self):
         num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')==-1])+1)
         row = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('dev')!=-1]))+2
@@ -184,7 +244,6 @@ class Main(QMainWindow, Ui_MainWindow):
         stepsSpinBox.setObjectName('steps_spinBox_%d'%num)
         self.dev_groupBox.layout().addWidget(stepsSpinBox,row,3,1,1)
 
-        #print(checkBox.objectName())
         
     def remove_device(self):
         num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')==-1]))
@@ -203,7 +262,6 @@ class Main(QMainWindow, Ui_MainWindow):
                 c = None
         
     def add_list_item(self):
-
         tx=self.searchbar.text()
         self.searchbar.setText("")
         rows = sorted(set(index.row() for index in
@@ -219,7 +277,6 @@ class Main(QMainWindow, Ui_MainWindow):
         self.searchbar.setText(tx)
 
     def remove_list_item(self):
-
         for dev in self.listWidget.selectedItems():
             self.model.addRow(dev.text())
             self.listWidget.takeItem(self.listWidget.row(dev))
@@ -349,6 +406,7 @@ class Main(QMainWindow, Ui_MainWindow):
         
             
     def start_scan(self):
+        self.scanresults = []
         numevents = self.numevents_spinBox.value()
         evt = self.event_comboBox.currentText()
         self.reading()
@@ -429,7 +487,6 @@ class Main(QMainWindow, Ui_MainWindow):
 class TimePlot(QDialog):
     def __init__(self, selected,evt,parent=None):
         super().__init__(parent)
-        #loadUi("expandPlot.ui", self)
 
         self.setWindowTitle("Time plot")
         self.resize(930,550)
@@ -439,7 +496,8 @@ class TimePlot(QDialog):
         self.range_dict = {}
         
         self.comboBox = QComboBox()
-        self.comboBox.addItems(self.selected)
+        labels = [s.split('@')[0] for s in self.selected]
+        self.comboBox.addItems(labels)
         
         self.setRange_pushButton = QPushButton('SetRange')
         self.setRange_pushButton.clicked.connect(self.set_range)
@@ -530,8 +588,7 @@ class TimePlot(QDialog):
             self.plot_pushButton.setChecked(False)
             
     def update_plot(self):
-        try:
-            
+        try:            
             data = self.parent().phasescan.get_thread_data('%s'%self.thread)
             if data.count(None)>0:
                 return
