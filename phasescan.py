@@ -48,7 +48,7 @@ async def set_many(con,ramp_list,read_list,evt,settings_role,data):
             await dpm.apply_settings(setpairs)
         
             async for reply in dpm:
-                if isinstance(reply,acsys.dpm.ItemData):
+                if reply.isReading:
                     one_data[reply.tag]= reply.data
                     data.append({'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
                 if one_data.count(None)==0:
@@ -98,8 +98,6 @@ async def read_many(con, thread_context):
 
         async for evt_res in dpm:
             if evt_res.isReading:
-                # We must have a lock before we can write data, otherwise the
-                # data could be read at the same time.
                 with thread_context['lock']:
                     thread_context['data'][evt_res.tag] = evt_res.data
             elif evt_res.isStatus:
@@ -139,8 +137,8 @@ class phasescan:
         self.main_role='linac_daily_rf_tuning'
         self.role=self.main_role
 
-        #self.dev_list = self.read_dev_list()
-        self.dev_list = self.TORs+self.LMs
+        self.dev_list = self.read_dev_list()
+        #self.dev_list = self.TORs+self.LMs
                 
     def swap_dict(self):
         if self.param_dict==self.main_dict:
@@ -196,11 +194,12 @@ class phasescan:
         print('Stopping thread', thread_name)
 
         # Close the DPM context.
-        self.thread_dict[thread_name]['daq_task'].stop()
+        #self.thread_dict[thread_name]['daq_task'].cancel()
         # Clean up the thread.
         self.thread_dict[thread_name]['thread'].join()
+    '''
 
-    '''        
+            
     def acnet_daq(self,thread_name):
         thread_loop = asyncio.new_event_loop()
 

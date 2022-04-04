@@ -16,7 +16,7 @@ from matplotlib.backends.backend_qtagg import (
     NavigationToolbar2QT as NavigationToolbar)
 
 
-
+#### Device list search model ####
 class ItemModel(QStandardItemModel):
     def __init__(self,data):
         super().__init__()
@@ -27,6 +27,7 @@ class ItemModel(QStandardItemModel):
             self.setItem(i, 0, item)
 
 
+#### Searchable, auto-complete combobox ####
 class ExtendedCombo( QComboBox ):
     def __init__( self,  parent = None):
         super( ExtendedCombo, self ).__init__( parent )
@@ -63,7 +64,8 @@ class ExtendedCombo( QComboBox ):
         index = self.findText(text)
         self.setCurrentIndex(index)
 
-        
+
+#### MAIN WINDOW ####
 Ui_MainWindow, QMainWindow = loadUiType('gui_window.ui')
 
 class Main(QMainWindow, Ui_MainWindow):
@@ -77,7 +79,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.event_comboBox.addItems(['default','15Hz','52','53','0a'])
         self.evt_dict = {'default':'','15Hz':'@p,15000','52':'@e,52,e,0','53':'@e,53,e,0','0a':'@e,0a,e,0'}
 
-        #### FILTER ENTRY MODEL ####
+        #### FILTER MODEL ####
         self.model = ItemModel(self.phasescan.dev_list)
         self.proxy_model = QSortFilterProxyModel()
         self.proxy_model.setFilterKeyColumn(-1)  
@@ -202,10 +204,10 @@ class Main(QMainWindow, Ui_MainWindow):
 
         ### ADD/REMOVE ROW BUTTONS ###
         self.addDevice_pushButton.setEnabled(False)
-        self.stackedWidget.currentChanged.connect(self.addDevice_pushButton.setEnabled)
+        self.stackedWidget.currentChanged.connect(self.enableAddRemove)
         self.addDevice_pushButton.clicked.connect(self.add_device)
         self.removeDevice_pushButton.setEnabled(False)
-        self.stackedWidget.currentChanged.connect(self.removeDevice_pushButton.setEnabled)
+        self.stackedWidget.currentChanged.connect(self.enableAddRemove)
         self.removeDevice_pushButton.clicked.connect(self.remove_device)
 
         #### FONTS #####
@@ -221,6 +223,15 @@ class Main(QMainWindow, Ui_MainWindow):
         
 
     #### CLASS FUNCTIONS ####
+    def enableAddRemove(self):
+        if self.stackedWidget.currentIndex()==1:
+            self.addDevice_pushButton.setEnabled(True)
+            self.removeDevice_pushButton.setEnabled(True)
+        else:
+            self.addDevice_pushButton.setEnabled(False)
+            self.removeDevice_pushButton.setEnabled(False)
+            
+    
     def add_device(self):
         num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')==-1])+1)
         row = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('dev')!=-1]))+2
