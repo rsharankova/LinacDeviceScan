@@ -70,48 +70,34 @@ async def read_once(con,drf_list):
                 break
     return settings
 
-async def read_many(con,dict):
-    async with acsys.dpm.DPMContext(con) as dpm:
-        await dpm.add_entries(list(enumerate(dict['paramlist'])))
-
-        await dpm.start()
-
-        async for evt_res in dpm:
-            if evt_res.isReading:
-                dict['data'][evt_res.tag]=evt_res.data
-                if not dict['run_daq']:
-                        break
-            else:
-                print(f'Status: {evt_res}')
-
-        print("Ending read_many loop")
-
-'''
 async def read_many(con, thread_context):
     """Read many values from the DPM."""
     async with acsys.dpm.DPMContext(con) as dpm:
-        thread_context['daq_task'] = dpm
-
+        #thread_context['daq_task'] = dpm
         await dpm.add_entries(list(enumerate(thread_context['paramlist'])))
 
         await dpm.start()
-
+        thread_context['data']=[]
         async for evt_res in dpm:
+            if thread_context['stop'].is_set():
+                break
+            thread_context["pause"].wait()
             if evt_res.isReading:
                 with thread_context['lock']:
-                    thread_context['data'][evt_res.tag] = evt_res.data
+                    thread_context['data'].append({'tag':evt_res.tag,'stamp':evt_res.stamp,'data': evt_res.data,'name':evt_res.meta['name']})
+                    if (len(thread_context['data'])>5000000):
+                        print("Buffer overflow, deleting",thread_context['data'][0]['name'],thread_context['data'][0]['name'])
+                        thread_context['data'].pop(0)
             elif evt_res.isStatus:
                 print(f'Status: {evt_res}')
             else:
                 print(f'Unknown response: {evt_res}')
 
         print('Ending read_many loop')
-'''
 
 class phasescan:
     def __init__(self):
         self.thread_dict = {}
-        self.thread_lock=threading.Lock()
 
         self.TORs = ['L:ATOR','L:BTOR','L:TO1IN','L:TO3IN','L:TO4IN','L:TO4OUT','L:TO5OUT',
                      'L:D0TOR','L:D1TOR','L:D2TOR','L:D3TOR','L:D4TOR','L:D5TOR','L:D7TOR','L:TORSIS','L:TORSOS','L:TORMDS']
@@ -120,13 +106,13 @@ class phasescan:
                     'L:D51LM','L:D52LM','L:D53LM','L:D54LM','L:D61LM','L:D62LM','L:D63LM','L:D64LM',
                     'L:D71LM','L:D72LM','L:D73LM','L:D74LM','L:DELM1','L:DELM2','L:DELM3','L:DELM4','L:DELM5','L:DELM7','L:DELM9',]
         
-        self.main_dict = {'RFQ':{'device':'L:RFQPAH','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
-                           'RFB':{'device':'L:RFBPAH','idx':2,'selected':False,'phase':0,'delta':0,'steps':2},
-                           'Tank 1':{'device':'L:V1QSET','idx':3,'selected':False,'phase':0,'delta':0,'steps':2},
-                           'Tank 2':{'device':'L:V2QSET','idx':4,'selected':False,'phase':0,'delta':0,'steps':2},
-                           'Tank 3':{'device':'L:V3QSET','idx':5,'selected':False,'phase':0,'delta':0,'steps':2},
-                           'Tank 4':{'device':'L:V4QSET','idx':6,'selected':False,'phase':0,'delta':0,'steps':2},
-                           'Tank 5':{'device':'L:V5QSET','idx':7,'selected':False,'phase':0,'delta':0,'steps':2}}
+        self.main_dict = {'RFQPAH':{'device':'L:RFQPAH','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
+                          'RFBPAH':{'device':'L:RFBPAH','idx':2,'selected':False,'phase':0,'delta':0,'steps':2},
+                          'V1QSET':{'device':'L:V1QSET','idx':3,'selected':False,'phase':0,'delta':0,'steps':2},
+                          'V2QSET':{'device':'L:V2QSET','idx':4,'selected':False,'phase':0,'delta':0,'steps':2},
+                          'V3QSET':{'device':'L:V3QSET','idx':5,'selected':False,'phase':0,'delta':0,'steps':2},
+                          'V4QSET':{'device':'L:V4QSET','idx':6,'selected':False,'phase':0,'delta':0,'steps':2},
+                          'V5QSET':{'device':'L:V5QSET','idx':7,'selected':False,'phase':0,'delta':0,'steps':2}}
         self.debug_dict={'Z:CUBE_X':{'device':'Z:CUBE_X','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
                          'Z:CUBE_Y':{'device':'Z:CUBE_Y','idx':2,'selected':False,'phase':0,'delta':0,'steps':2},
                          'Z:CUBE_Z':{'device':'Z:CUBE_Z','idx':3,'selected':False,'phase':0,'delta':0,'steps':2}}
@@ -155,8 +141,15 @@ class phasescan:
         dev_list=[dev.strip() for dev in dev_list.splitlines() if devfilt.match(dev)]
 
         return dev_list
+    
+    def acnet_daq_scan(self,thread_name,ramp_list,read_list,evt,role,scan_data):
+        thread_loop = asyncio.new_event_loop()
+        try:
+            asyncio.set_event_loop(thread_loop)
+            acsys.run_client(set_many, ramp_list=ramp_list,read_list=read_list,evt=evt,settings_role=role,data=scan_data)
+        finally:
+            thread_loop.close()
             
-    '''
     def _acnet_daq(self, thread_name):
         """Run the ACNet DAQ."""
         event_loop = asyncio.new_event_loop()
@@ -170,7 +163,9 @@ class phasescan:
     def get_thread_data(self, thread_name):
         """Get the data from the thread."""
         with self.thread_dict[thread_name]['lock']:
-            return self.thread_dict[thread_name]['data'].copy()
+            data=self.thread_dict[thread_name]['data'].copy()
+            self.thread_dict[thread_name]['data'].clear()
+            return data
 
     def start_thread(self, thread_name, param_list):
         """Start the thread."""
@@ -184,54 +179,32 @@ class phasescan:
             'thread': daq_thread,
             'lock': threading.Lock(),
             'data': [None]*len(param_list),
-            'paramlist': param_list
+            'paramlist': param_list,
+            'pause': threading.Event(),
+            'stop': threading.Event()
         }
-
+        self.thread_dict[thread_name]['pause'].set() #not paused when set
+        
         daq_thread.start()
 
     def stop_thread(self, thread_name):
         """Stop the thread."""
         print('Stopping thread', thread_name)
-
+        self.thread_dict[thread_name]['pause'].set() #make sure not paused
+        self.thread_dict[thread_name]['stop'].set()
         # Close the DPM context.
         #self.thread_dict[thread_name]['daq_task'].cancel()
         # Clean up the thread.
         self.thread_dict[thread_name]['thread'].join()
-    '''
 
-            
-    def acnet_daq(self,thread_name):
-        thread_loop = asyncio.new_event_loop()
+    def pause_thread(self,thread_name):
+        print("Pause thread",thread_name)
+        self.thread_dict[thread_name]['pause'].clear()
 
-        try:
-            asyncio.set_event_loop(thread_loop)
-            acsys.run_client(read_many, dict=self.thread_dict[thread_name])
-        finally:
-            thread_loop.close()
+    def resume_thread(self,thread_name):
+        print("Resume thread",thread_name)
+        self.thread_dict[thread_name]['pause'].set()
 
-    def acnet_daq_scan(self,thread_name,ramp_list,read_list,evt,role,scan_data):
-        thread_loop = asyncio.new_event_loop()
-        try:
-            asyncio.set_event_loop(thread_loop)
-            acsys.run_client(set_many, ramp_list=ramp_list,read_list=read_list,evt=evt,settings_role=role,data=scan_data)
-        finally:
-            thread_loop.close()
-
-    def get_thread_data(self,thread_name):
-        with self.thread_lock:
-            return self.thread_dict[thread_name]['data']
-
-
-    def start_thread(self,thread_name,paramlist):
-        print('Starting thread', thread_name)
-        daqthread = threading.Thread(target=self.acnet_daq, args=(thread_name,))
-        self.thread_dict[thread_name]={'run_daq':True, 'thread': daqthread, 'data':[None]*len(paramlist), 'paramlist':paramlist}
-        daqthread.start()
-    
-    def stop_thread(self,thread_name):
-        self.thread_dict[thread_name]['run_daq']=False
-        self.thread_dict[thread_name]['thread'].join()
-    
     def stop_all_threads(self):
         for t in self.thread_dict:
             self.stop_thread(t)
@@ -278,7 +251,10 @@ class phasescan:
         try:
             file = io.open(r'%s'%filename)
             lines = file.readlines()
-            read_list  = [l.strip('\n').strip(',') for l in lines if l.find(':')!=-1 and isinstance(l,str)]
+            read_list = []
+            for line in lines:
+                devs = [dev.strip('\n') for dev in line.split(',') if dev.find(':')!=-1 and isinstance(dev,str)] 
+                [read_list.append(dev) for dev in devs]
 
         except:
             read_list = []

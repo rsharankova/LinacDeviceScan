@@ -99,6 +99,7 @@ class Main(QMainWindow, Ui_MainWindow):
 
         #### LAYOUTS ####
         self.dev_comboBox_8 = ExtendedCombo()
+        self.dev_comboBox_8.setObjectName('dev_comboBox_8')
         self.dev_comboBox_8.setModel(self.model)
         self.dev_comboBox_8.setModelColumn(0)
 
@@ -107,16 +108,18 @@ class Main(QMainWindow, Ui_MainWindow):
         debug_gridLayout.addWidget(self.label_7,0,0,1,1)
         debug_gridLayout.addWidget(self.label_8,0,1,1,1)
         debug_gridLayout.addWidget(self.label_9,0,2,1,1)
-        #debug_gridLayout.addWidget(self.cube_comboBox_1,2,1,1,1)
         debug_gridLayout.addWidget(self.cube_checkBox_1,1,0,1,1)
-        debug_gridLayout.addWidget(self.cube_doubleSpinBox_1,1,1,1,1)
-        debug_gridLayout.addWidget(self.cube_steps_spinBox_1,1,2,1,1)
+        debug_gridLayout.addWidget(self.cube_comboBox_1,1,1,1,1)
+        debug_gridLayout.addWidget(self.cube_doubleSpinBox_1,1,2,1,1)
+        debug_gridLayout.addWidget(self.cube_steps_spinBox_1,1,3,1,1)
         debug_gridLayout.addWidget(self.cube_checkBox_2,2,0,1,1)
-        debug_gridLayout.addWidget(self.cube_doubleSpinBox_2,2,1,1,1)
-        debug_gridLayout.addWidget(self.cube_steps_spinBox_2,2,2,1,1)
+        debug_gridLayout.addWidget(self.cube_comboBox_2,2,1,1,1)
+        debug_gridLayout.addWidget(self.cube_doubleSpinBox_2,2,2,1,1)
+        debug_gridLayout.addWidget(self.cube_steps_spinBox_2,2,3,1,1)
         debug_gridLayout.addWidget(self.cube_checkBox_3,3,0,1,1)
-        debug_gridLayout.addWidget(self.cube_doubleSpinBox_3,3,1,1,1)
-        debug_gridLayout.addWidget(self.cube_steps_spinBox_3,3,2,1,1)
+        debug_gridLayout.addWidget(self.cube_comboBox_3,3,1,1,1)
+        debug_gridLayout.addWidget(self.cube_doubleSpinBox_3,3,2,1,1)
+        debug_gridLayout.addWidget(self.cube_steps_spinBox_3,3,3,1,1)
         self.cube_groupBox.setLayout(debug_gridLayout)
         ### OTHER DEVICES PAGE###
         dev_gridLayout = QGridLayout()
@@ -140,7 +143,7 @@ class Main(QMainWindow, Ui_MainWindow):
         main_gridLayout.addWidget(self.label_2,1,2,1,1)
         main_gridLayout.addWidget(self.label_3,1,3,1,1)
 
-        objects = ['main_checkBox','dev_comboBox','doubleSpinBox','steps_spinBox']
+        objects = ['dev_checkBox','dev_comboBox','doubleSpinBox','steps_spinBox']
         classes = [QCheckBox,QComboBox,QDoubleSpinBox,QSpinBox]
         
         for i in range(1,8):
@@ -223,6 +226,7 @@ class Main(QMainWindow, Ui_MainWindow):
         
 
     #### CLASS FUNCTIONS ####
+    
     def enableAddRemove(self):
         if self.stackedWidget.currentIndex()==1:
             self.addDevice_pushButton.setEnabled(True)
@@ -234,7 +238,7 @@ class Main(QMainWindow, Ui_MainWindow):
     
     def add_device(self):
         num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')==-1])+1)
-        row = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('dev')!=-1]))+2
+        row = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('dev')!=-1]))-7+2
 
         checkBox = QCheckBox()
         checkBox.setObjectName('dev_checkBox_%d'%num)
@@ -324,15 +328,28 @@ class Main(QMainWindow, Ui_MainWindow):
         
 
     def add_param(self):
+
+        if self.stackedWidget.currentIndex()==2:
+            prefix ='cube'
+            num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')!=-1]))+1
+        else:
+            prefix = 'dev'
+            num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')==-1]))+1
         for key in self.phasescan.param_dict:
-            for checkBox in self.findChildren(QCheckBox):
-                if checkBox.isChecked() and checkBox.text()==key:
-                    self.phasescan.param_dict[key]['selected']=True
+            for i in range(1,num):
+                checkBox = self.findChild(QCheckBox,'%s_checkBox_%d'%(prefix,i))
+                comboBox = self.findChild(QComboBox,'%s_comboBox_%d'%(prefix,i))
+                if checkBox.isChecked():
+                    comboBox.setEnabled(False)
+                    if comboBox.currentText()==key:
+                        self.phasescan.param_dict[key]['selected']=True
 
-                elif checkBox.isChecked()==False and checkBox.text()==key:
-                    self.phasescan.param_dict[key]['selected']=False
-                    self.phasescan.param_dict[key]['phase']=0
-
+                elif checkBox.isChecked()==False:
+                    comboBox.setEnabled(True)
+                    if comboBox.currentText()==key:
+                        self.phasescan.param_dict[key]['selected']=False
+                        self.phasescan.param_dict[key]['phase']=0
+            
 
     def read_phases(self):
         for key in self.phasescan.param_dict:
@@ -358,18 +375,23 @@ class Main(QMainWindow, Ui_MainWindow):
 
                     
     def select_all(self):
+
         if self.stackedWidget.currentIndex()==0: 
-            [ checkBox.setChecked(True) for checkBox in self.findChildren(QCheckBox) if checkBox.objectName().find('main')!=-1 ]
+            [ self.findChild(QCheckBox,'dev_checkBox_%d'%i).setChecked(True) for i in range(1,8)]
         elif self.stackedWidget.currentIndex()==1:
-            [ checkBox.setChecked(True) for checkBox in self.findChildren(QCheckBox) if checkBox.objectName().find('dev')!=-1 ]
+            num = int(len([checkBox for checkBox in self.findChildren(QCheckBox) if checkBox.objectName().find('dev')!=-1 ]))
+            [ self.findChild(QCheckBox,'dev_checkBox_%d'%i).setChecked(True) for i in range(8,num+1)]
         else:
             return None
             
     def clear_all(self):
-        if self.stackedWidget.currentIndex()==0: 
-            [ checkBox.setChecked(False) for checkBox in self.findChildren(QCheckBox) if checkBox.objectName().find('main')!=-1 ]
+        if self.stackedWidget.currentIndex()==0:
+            [ self.findChild(QCheckBox,'dev_checkBox_%d'%i).setChecked(False) for i in range(1,8)]
+            #[ checkBox.setChecked(False) for checkBox in self.findChildren(QCheckBox) if checkBox.objectName().find('main')!=-1 ]
         elif self.stackedWidget.currentIndex()==1:
-            [ checkBox.setChecked(False) for checkBox in self.findChildren(QCheckBox) if checkBox.objectName().find('dev')!=-1 ]
+            num = int(len([checkBox for checkBox in self.findChildren(QCheckBox) if checkBox.objectName().find('dev')!=-1 ]))
+            [ self.findChild(QCheckBox,'dev_checkBox_%d'%i).setChecked(False) for i in range(8,num+1)]
+            #[ checkBox.setChecked(False) for checkBox in self.findChildren(QCheckBox) if checkBox.objectName().find('dev')!=-1 ]
         else:
             return None
 
@@ -414,7 +436,7 @@ class Main(QMainWindow, Ui_MainWindow):
             self.read_plainTextEdit.setPlainText('Reading_devices.csv')
         filename = self.read_plainTextEdit.toPlainText()
         self.read_list = self.phasescan.readList(filename)
-        
+        print('Number of reading devices: ',len(self.read_list))
             
     def start_scan(self):
         self.scanresults = []
@@ -561,6 +583,7 @@ class TimePlot(QDialog):
     def close_dialog(self):
         if self.thread in self.parent().phasescan.get_list_of_threads():
             self.parent().phasescan.stop_thread('%s'%self.thread)
+        self.timer.stop()
         self.close()
 
     def closeEvent(self, event):
@@ -586,7 +609,7 @@ class TimePlot(QDialog):
         
     def toggle_plot(self):
         if self.plot_pushButton.isChecked() and len(self.selected)>0:
-            self.xaxis = np.array([])
+            self.xaxes = [np.array([]) for i in range(len(self.selected))]
             self.yaxes = [np.array([]) for i in range(len(self.selected))]
             self.timer.start()
             self.parent().phasescan.start_thread('%s'%self.thread,self.selected)
@@ -599,23 +622,28 @@ class TimePlot(QDialog):
             self.plot_pushButton.setChecked(False)
             
     def update_plot(self):
-        try:            
-            data = self.parent().phasescan.get_thread_data('%s'%self.thread)
-            if data.count(None)>0:
-                return
+        try:
+            buffer = self.parent().phasescan.get_thread_data('%s'%self.thread)
             labels = [s.split('@')[0] for s in self.selected]
 
             colors = plt.rcParams['axes.prop_cycle']
             colors = colors.by_key()['color']
             plt.rcParams["axes.titlelocation"] = 'right'
-            
-            self.xaxis = np.append(self.xaxis,datetime.now())
+
+            data=[None]*len(labels)
+            tstamps=[None]*len(labels)
+            for i in range(len(labels)):
+                data[i]=[d['data'] for d in buffer if d['name']==labels[i]]
+                tstamps[i]=[d['stamp'] for d in buffer if d['name']==labels[i]]
+
             for i,d in enumerate(data):
                 self.ax[i].cla()
+                self.ax[i].xaxis_date('US/Central')
                 space= space + '  '*len(labels[i-1]) if i>0 else ''
                 self.ax[i].set_title(labels[i]+space,color=colors[i],ha='right',fontsize='small')
+                self.xaxes[i] = np.append(self.xaxes[i],tstamps[i])
                 self.yaxes[i] = np.append(self.yaxes[i],d)
-                self.ax[i].plot(self.xaxis,self.yaxes[i],c=colors[i],label=labels[i])
+                self.ax[i].plot(self.xaxes[i],self.yaxes[i],c=colors[i],label=labels[i])
                 self.ax[i].tick_params(axis='y', colors=colors[i], labelsize='small',rotation=90)
                 self.ax[i].yaxis.set_major_locator(MaxNLocator(5))
                 if labels[i] in self.range_dict.keys():
@@ -685,6 +713,7 @@ class BarPlot(QDialog):
     def close_dialog(self):
         if self.thread in self.parent().phasescan.get_list_of_threads():
             self.parent().phasescan.stop_thread('%s'%self.thread)
+        self.timer.stop()
         self.close()
 
     def closeEvent(self, event):
@@ -700,7 +729,8 @@ class BarPlot(QDialog):
         self.timer = self.canvas.new_timer(50)
         self.timer.add_callback(self.update_plot)
         self.first_data = np.zeros(len(self.selected))
-
+        self.data=[None]*len(self.selected)
+        
     def toggle_plot(self):
         if self.plot_pushButton.isChecked() and len(self.selected)>0:
             self.timer.start()
@@ -716,19 +746,23 @@ class BarPlot(QDialog):
     def update_plot(self):
         try:
             self.ax.cla()
-            data = self.parent().phasescan.get_thread_data('%s'%self.thread)
-            if data.count(None)>0:
-                return None
+            buffer = self.parent().phasescan.get_thread_data('%s'%self.thread)
+            devs=[d.split("@")[0] for d in self.selected]
+            for d in buffer:
+                self.data[devs.index(d['name'])]=d['data']
 
+            if self.data.count(None)>0:
+                return None
+            
             if self.first:
-                self.first_data = data.copy()
+                self.first_data = self.data.copy()
                 self.first=False
 
-            colors = ['green' if data[i] < self.first_data[i] else 'red' for i in range(len(self.first_data))]
-            self.ax.bar([i for i in range(len(self.first_data))],height=np.subtract(self.first_data,data),bottom = data,alpha=0.99,color=colors)
-            self.ax.bar([i for i in range(len(data))],height=data,alpha=0.5,color='blue')
+            colors = ['green' if self.data[i] < self.first_data[i] else 'red' for i in range(len(self.first_data))]
+            self.ax.bar([i for i in range(len(self.first_data))],height=np.subtract(self.first_data,self.data),bottom = self.data,alpha=0.99,color=colors)
+            self.ax.bar([i for i in range(len(self.data))],height=self.data,alpha=0.5,color='blue')
             labels = [s.split('@')[0] for s in self.selected]
-            self.ax.set_xticks([i for i in range(len(data))],labels,rotation = 'vertical',fontsize=6)
+            self.ax.set_xticks([i for i in range(len(self.data))],labels,rotation = 'vertical',fontsize=6)
             if self.style in self.style_dict.keys():
                 self.ax.set_ylim(self.style_dict[self.style]['ymin'],self.style_dict[self.style]['ymax'])
                 self.ax.set_ylabel(self.style_dict[self.style]['ylabel'])

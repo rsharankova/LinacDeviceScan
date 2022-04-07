@@ -63,8 +63,7 @@
           <widget class="QLineEdit" name="searchbar"/>
          </item>
          <item>
-          <widget class="QTableView" name="table">
-          </widget>
+          <widget class="QTableView" name="table"/>
          </item>
         </layout>
        </item>
@@ -184,7 +183,7 @@
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="page_main">
         <property name="sizePolicy">
@@ -316,7 +315,7 @@
            <set>Qt::AlignCenter</set>
           </property>
          </widget>
-         <widget class="QCheckBox" name="main_checkBox_1">
+         <widget class="QCheckBox" name="dev_checkBox_1">
           <property name="geometry">
            <rect>
             <x>13</x>
@@ -397,7 +396,7 @@
            <number>100</number>
           </property>
          </widget>
-         <widget class="QCheckBox" name="main_checkBox_2">
+         <widget class="QCheckBox" name="dev_checkBox_2">
           <property name="geometry">
            <rect>
             <x>13</x>
@@ -484,7 +483,7 @@
            <number>100</number>
           </property>
          </widget>
-         <widget class="QCheckBox" name="main_checkBox_3">
+         <widget class="QCheckBox" name="dev_checkBox_3">
           <property name="geometry">
            <rect>
             <x>13</x>
@@ -565,7 +564,7 @@
            <number>100</number>
           </property>
          </widget>
-         <widget class="QCheckBox" name="main_checkBox_4">
+         <widget class="QCheckBox" name="dev_checkBox_4">
           <property name="geometry">
            <rect>
             <x>13</x>
@@ -646,7 +645,7 @@
            <number>100</number>
           </property>
          </widget>
-         <widget class="QCheckBox" name="main_checkBox_5">
+         <widget class="QCheckBox" name="dev_checkBox_5">
           <property name="geometry">
            <rect>
             <x>13</x>
@@ -727,7 +726,7 @@
            <number>100</number>
           </property>
          </widget>
-         <widget class="QCheckBox" name="main_checkBox_6">
+         <widget class="QCheckBox" name="dev_checkBox_6">
           <property name="geometry">
            <rect>
             <x>13</x>
@@ -808,7 +807,7 @@
            <number>100</number>
           </property>
          </widget>
-         <widget class="QCheckBox" name="main_checkBox_7">
+         <widget class="QCheckBox" name="dev_checkBox_7">
           <property name="geometry">
            <rect>
             <x>13</x>
@@ -1180,9 +1179,9 @@
          <widget class="QCheckBox" name="cube_checkBox_1">
           <property name="geometry">
            <rect>
-            <x>13</x>
+            <x>10</x>
             <y>47</y>
-            <width>89</width>
+            <width>16</width>
             <height>20</height>
            </rect>
           </property>
@@ -1193,7 +1192,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Z:CUBE_X</string>
+           <string/>
           </property>
          </widget>
          <widget class="QDoubleSpinBox" name="cube_doubleSpinBox_1">
@@ -1234,9 +1233,9 @@
          <widget class="QCheckBox" name="cube_checkBox_2">
           <property name="geometry">
            <rect>
-            <x>13</x>
+            <x>10</x>
             <y>81</y>
-            <width>89</width>
+            <width>16</width>
             <height>20</height>
            </rect>
           </property>
@@ -1247,7 +1246,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Z:CUBE_Y</string>
+           <string/>
           </property>
          </widget>
          <widget class="QDoubleSpinBox" name="cube_doubleSpinBox_2">
@@ -1288,9 +1287,9 @@
          <widget class="QCheckBox" name="cube_checkBox_3">
           <property name="geometry">
            <rect>
-            <x>13</x>
+            <x>10</x>
             <y>115</y>
-            <width>89</width>
+            <width>16</width>
             <height>20</height>
            </rect>
           </property>
@@ -1301,7 +1300,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Z:CUBE_Z</string>
+           <string/>
           </property>
          </widget>
          <widget class="QDoubleSpinBox" name="cube_doubleSpinBox_3">
@@ -1332,6 +1331,51 @@
           <property name="minimum">
            <number>2</number>
           </property>
+         </widget>
+         <widget class="QComboBox" name="cube_comboBox_1">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>50</y>
+            <width>81</width>
+            <height>26</height>
+           </rect>
+          </property>
+          <item>
+           <property name="text">
+            <string>Z:CUBE_X</string>
+           </property>
+          </item>
+         </widget>
+         <widget class="QComboBox" name="cube_comboBox_2">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>80</y>
+            <width>81</width>
+            <height>26</height>
+           </rect>
+          </property>
+          <item>
+           <property name="text">
+            <string>Z:CUBE_Y</string>
+           </property>
+          </item>
+         </widget>
+         <widget class="QComboBox" name="cube_comboBox_3">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>110</y>
+            <width>81</width>
+            <height>26</height>
+           </rect>
+          </property>
+          <item>
+           <property name="text">
+            <string>Z:CUBE_Z</string>
+           </property>
+          </item>
          </widget>
         </widget>
        </widget>
