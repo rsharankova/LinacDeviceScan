@@ -172,7 +172,7 @@ class phasescan:
         event_loop = asyncio.new_event_loop()
         try:
             asyncio.set_event_loop(event_loop)
-            if len(thread_dict[thread_name]['ramp_list'])==0:
+            if len(self.thread_dict[thread_name]['ramp_list'])==0:
                 acsys.run_client(read_many, thread_context=self.thread_dict[thread_name])
             else:
                 acsys.run_client(set_many, thread_context=self.thread_dict[thread_name])
@@ -196,7 +196,7 @@ class phasescan:
             self.thread_dict[thread_name]['data'].clear()
             return data
 
-    def start_thread(self, thread_name, param_list,ramp_list,role):
+    def start_thread(self, thread_name, param_list, ramp_list, role):
         """Start the thread."""
         print('Starting thread', thread_name)
         daq_thread = threading.Thread(
@@ -292,15 +292,6 @@ class phasescan:
             print('Read device list empty')
         return read_list
         
-    def apply_settings(self,thread_name,ramp_list,read_list,evt):
-        set_list = [s for s in ramp_list[0] if str(s).find(':')!=-1]
-        set_list=['%s.SETTING%s'%(l,evt) for l in set_list]
-        drf_list = set_list+['%s%s'%(l,evt) for l in read_list if len(read_list)!=0]
-
-        print('Starting thread', thread_name)
-        #daqthread = threading.Thread(target=self.acnet_daq_scan, args=(thread_name,ramp_list,read_list,evt,self.role,scan_data,))
-        #daqthread.start()
-
 
     def fill_write_dataframe(self,data,filename):
         df = pd.DataFrame.from_records(data)

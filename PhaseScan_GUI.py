@@ -458,12 +458,12 @@ class Main(QMainWindow, Ui_MainWindow):
             print('Debug mode')
             self.thread = QUuid.createUuid().toString()
             try:
-                self.parent().phasescan.start_thread('%s'%self.thread,drf_list,self.ramplist,self.phasescan.main_role)
+                self.phasescan.start_thread('%s'%self.thread,drf_list,self.ramplist,self.phasescan.role)
                 # stop scan/read loop
-                self.scanresults = get_thread_data('%s'%self.thread)
+                self.scanresults = self.phasescan.get_thread_data('%s'%self.thread)
                 #  stop thread
-            except:
-                print('Scan failed')
+            except Exception as e:
+                print('Scan failed',e)
 
     def stop_scan(self):
         if self.thread in self.phasescan.get_list_of_threads():
@@ -626,7 +626,7 @@ class TimePlot(QDialog):
             self.xaxes = [np.array([]) for i in range(len(self.selected))]
             self.yaxes = [np.array([]) for i in range(len(self.selected))]
             self.timer.start()
-            self.parent().phasescan.start_thread('%s'%self.thread,self.selected)
+            self.parent().phasescan.start_thread('%s'%self.thread,self.selected,'','')
         elif self.plot_pushButton.isChecked()==False: 
             self.timer.stop()
             self.parent().phasescan.stop_thread('%s'%self.thread)
@@ -748,7 +748,7 @@ class BarPlot(QDialog):
     def toggle_plot(self):
         if self.plot_pushButton.isChecked() and len(self.selected)>0:
             self.timer.start()
-            self.parent().phasescan.start_thread('%s'%self.thread,self.selected)
+            self.parent().phasescan.start_thread('%s'%self.thread,self.selected,'','')
         elif self.plot_pushButton.isChecked()==False: 
             self.timer.stop()
             self.parent().phasescan.stop_thread('%s'%self.thread)
