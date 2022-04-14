@@ -3,7 +3,7 @@
 GUI applicaton for scanning Linac devices based on acsys-python library. Heavily borrowing from [this demo](https://github.com/fermi-controls/pyqt-demo)
 
 ## Prerequisites:
-- acsys-python >= 0.11.6 
+- acsys-python >= 0.12.3 
 - pandas
 - functools
 - urllib
