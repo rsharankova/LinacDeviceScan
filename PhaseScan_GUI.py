@@ -445,25 +445,23 @@ class Main(QMainWindow, Ui_MainWindow):
         print('Number of reading devices: ',len(self.read_list))
             
     def start_scan(self):
+        self.thread = QUuid.createUuid().toString()
         self.scanresults = []
+        
         numevents = self.numevents_spinBox.value()
         evt = self.evt_dict[self.event_comboBox.currentText()]
+
         self.reading()
-        self.read_phases()
-        set_list = [s for s in self.ramplist[0] if str(s).find(':')!=-1]
-        set_list=['%s.SETTING%s'%(l,evt) for l in set_list]
+
+        set_list = ['%s.SETTING%s'%(s,evt) for s in self.ramplist[0] if str(s).find(':')!=-1] if len(self.ramplist)>0 else []
+
         drf_list = set_list+['%s%s'%(l,evt) for l in self.read_list if len(self.read_list)!=0]
 
-        if self.debug_pushButton.isChecked():
-            print('Debug mode')
-            self.thread = QUuid.createUuid().toString()
-            try:
-                self.phasescan.start_thread('%s'%self.thread,drf_list,self.ramplist,self.phasescan.role)
-                # stop scan/read loop
-                self.scanresults = self.phasescan.get_thread_data('%s'%self.thread)
-                #  stop thread
-            except Exception as e:
-                print('Scan failed',e)
+        try:
+            self.phasescan.start_thread('%s'%self.thread,drf_list,self.ramplist,self.phasescan.role,numevents)
+
+        except Exception as e:
+            print('Scan failed',e)
 
     def stop_scan(self):
         if self.thread in self.phasescan.get_list_of_threads():
@@ -478,11 +476,13 @@ class Main(QMainWindow, Ui_MainWindow):
             self.phasescan.resume_thread('%s'%self.thread)
         
     def display_scan_results(self):
+        self.scanresults.extend(self.phasescan.get_thread_data('%s'%self.thread))
         for line in self.scanresults:
             #print(','.join([str(l) for l in line]))
             print(line)
 
-    def write_scan_results(self):        
+    def write_scan_results(self):
+        self.scanresults.extend(self.phasescan.get_thread_data('%s'%self.thread))
         if not self.scan_plainTextEdit.toPlainText():
             print('Using default filename')
             self.scan_plainTextEdit.setPlainText('devicescan.csv')
@@ -626,7 +626,7 @@ class TimePlot(QDialog):
             self.xaxes = [np.array([]) for i in range(len(self.selected))]
             self.yaxes = [np.array([]) for i in range(len(self.selected))]
             self.timer.start()
-            self.parent().phasescan.start_thread('%s'%self.thread,self.selected,'','')
+            self.parent().phasescan.start_thread('%s'%self.thread,self.selected,'','',-1)
         elif self.plot_pushButton.isChecked()==False: 
             self.timer.stop()
             self.parent().phasescan.stop_thread('%s'%self.thread)
@@ -748,7 +748,7 @@ class BarPlot(QDialog):
     def toggle_plot(self):
         if self.plot_pushButton.isChecked() and len(self.selected)>0:
             self.timer.start()
-            self.parent().phasescan.start_thread('%s'%self.thread,self.selected,'','')
+            self.parent().phasescan.start_thread('%s'%self.thread,self.selected,'','',-1)
         elif self.plot_pushButton.isChecked()==False: 
             self.timer.stop()
             self.parent().phasescan.stop_thread('%s'%self.thread)

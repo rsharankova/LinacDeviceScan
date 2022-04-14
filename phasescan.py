@@ -60,12 +60,12 @@ async def set_many(con,thread_context):
     async with acsys.dpm.DPMContext(con) as dpm:
         await dpm.enable_settings(role=thread_context['role'])
 
-        await dpm.add_entries(list(enumerate(thread_context['paramlist'])))
+        await dpm.add_entries(list(enumerate(thread_context['param_list'])))
 
         await dpm.start()
-        thread_context['data']=[]
+        print("Start ramp")
         for rr in thread_context['ramp_list']:
-            one_data = [None]*len(thread_context['paramlist'])
+            one_data = [None]*len(thread_context['param_list'])
             setpairs = list(enumerate([n for n in rr if isinstance(n,float)]))
             await dpm.apply_settings(setpairs)
         
@@ -79,6 +79,7 @@ async def set_many(con,thread_context):
                         thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
                 if one_data.count(None)==0:
                     break
+        print("Ended ramp")
     return None
 
 async def read_once(con,drf_list):
@@ -100,15 +101,16 @@ async def read_many(con, thread_context):
     """Read many values from the DPM."""
     async with acsys.dpm.DPMContext(con) as dpm:
         #thread_context['daq_task'] = dpm
-        await dpm.add_entries(list(enumerate(thread_context['paramlist'])))
+        await dpm.add_entries(list(enumerate(thread_context['param_list'])))
 
+        it = int(thread_context['Nmeas'])*len(thread_context['param_list'])
         await dpm.start()
-        thread_context['data']=[]
         async for evt_res in dpm:
             if thread_context['stop'].is_set():
                 break
             thread_context["pause"].wait()
             if evt_res.isReading:
+                it = it-1
                 with thread_context['lock']:
                     thread_context['data'].append({'tag':evt_res.tag,'stamp':evt_res.stamp,'data': evt_res.data,'name':evt_res.meta['name']})
                     if (len(thread_context['data'])>5000000):
@@ -118,6 +120,8 @@ async def read_many(con, thread_context):
                 print(f'Status: {evt_res}')
             else:
                 print(f'Unknown response: {evt_res}')
+            if it==0:
+                thread_context['stop'].set()
 
         print('Ending read_many loop')
 
@@ -178,6 +182,7 @@ class phasescan:
                 acsys.run_client(set_many, thread_context=self.thread_dict[thread_name])
         finally:
             event_loop.close()
+            self.thread_dict[thread_name]['stop'].set()
             
     def _acnet_daq(self, thread_name):
         """Run the ACNet DAQ."""
@@ -196,7 +201,7 @@ class phasescan:
             self.thread_dict[thread_name]['data'].clear()
             return data
 
-    def start_thread(self, thread_name, param_list, ramp_list, role):
+    def start_thread(self, thread_name, param_list, ramp_list, role, Nmeas):
         """Start the thread."""
         print('Starting thread', thread_name)
         daq_thread = threading.Thread(
@@ -207,10 +212,11 @@ class phasescan:
         self.thread_dict[thread_name] = {
             'thread': daq_thread,
             'lock': threading.Lock(),
-            'data': [None]*len(param_list),
-            'paramlist': param_list,
+            'data': [],
+            'param_list': param_list,
             'ramp_list':ramp_list,
             'role':role,
+            'Nmeas':Nmeas,
             'pause': threading.Event(),
             'stop': threading.Event()
         }
@@ -241,7 +247,7 @@ class phasescan:
             self.stop_thread(t)
 
     def get_list_of_threads(self):
-        return self.thread_dict.keys()
+        return [key for key in self.thread_dict.keys() if not self.thread_dict[key]['stop'].is_set()]
     
     def build_set_device_list(self,devlist):
         drf_list=[]
