@@ -335,6 +335,12 @@ class Main(QMainWindow, Ui_MainWindow):
         else:
             prefix = 'dev'
             num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')==-1]))+1
+            
+        [self.phasescan.param_dict.update({self.findChild(QComboBox,'%s_comboBox_%d'%(prefix,i)).currentText().split(':')[0]:
+                                           {'device':self.findChild(QComboBox,'%s_comboBox_%d'%(prefix,i)).currentText(),'idx':i,'selected':False,'phase':0,'delta':0,'steps':2}})
+         for i in range(1,num) if self.findChild(QCheckBox,'%s_checkBox_%d'%(prefix,i)).isChecked()
+         and self.findChild(QComboBox,'%s_comboBox_%d'%(prefix,i)).currentText() not in self.phasescan.param_dict]
+
         for key in self.phasescan.param_dict:
             for i in range(1,num):
                 checkBox = self.findChild(QCheckBox,'%s_checkBox_%d'%(prefix,i))
@@ -441,14 +447,21 @@ class Main(QMainWindow, Ui_MainWindow):
     def start_scan(self):
         self.scanresults = []
         numevents = self.numevents_spinBox.value()
-        evt = self.event_comboBox.currentText()
+        evt = self.evt_dict[self.event_comboBox.currentText()]
         self.reading()
         self.read_phases()
+        set_list = [s for s in self.ramplist[0] if str(s).find(':')!=-1]
+        set_list=['%s.SETTING%s'%(l,evt) for l in set_list]
+        drf_list = set_list+['%s%s'%(l,evt) for l in self.read_list if len(self.read_list)!=0]
+
         if self.debug_pushButton.isChecked():
             print('Debug mode')
             self.thread = QUuid.createUuid().toString()
             try:
-                self.phasescan.apply_settings(self.ramplist,self.read_list,self.evt_dict[evt],self.thread,self.scanresults)   
+                self.parent().phasescan.start_thread('%s'%self.thread,drf_list,self.ramplist,self.phasescan.main_role)
+                # stop scan/read loop
+                self.scanresults = get_thread_data('%s'%self.thread)
+                #  stop thread
             except:
                 print('Scan failed')
 
@@ -457,11 +470,12 @@ class Main(QMainWindow, Ui_MainWindow):
             self.phasescan.stop_thread('%s'%self.thread)
 
     def pause_scan(self):
-        print('Not implemented yet')
+        if self.thread in self.phasescan.get_list_of_threads():
+            self.phasescan.pause_thread('%s'%self.thread)
 
     def resume_scan(self):
-        print('Not implemented yet')
-
+        if self.thread in self.phasescan.get_list_of_threads():
+            self.phasescan.resume_thread('%s'%self.thread)
         
     def display_scan_results(self):
         for line in self.scanresults:

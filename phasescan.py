@@ -28,7 +28,7 @@ async def set_once(con,drf_list,value_list,settings_role):
 
     return None
 
-
+'''
 async def set_many(con,ramp_list,read_list,evt,settings_role,data):
     async with acsys.dpm.DPMContext(con) as dpm:
         await dpm.enable_settings(role=settings_role)
@@ -51,6 +51,32 @@ async def set_many(con,ramp_list,read_list,evt,settings_role,data):
                 if reply.isReading:
                     one_data[reply.tag]= reply.data
                     data.append({'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
+                if one_data.count(None)==0:
+                    break
+    return None
+'''
+
+async def set_many(con,thread_context):
+    async with acsys.dpm.DPMContext(con) as dpm:
+        await dpm.enable_settings(role=thread_context['role'])
+
+        await dpm.add_entries(list(enumerate(thread_context['paramlist'])))
+
+        await dpm.start()
+        thread_context['data']=[]
+        for rr in thread_context['ramp_list']:
+            one_data = [None]*len(thread_context['paramlist'])
+            setpairs = list(enumerate([n for n in rr if isinstance(n,float)]))
+            await dpm.apply_settings(setpairs)
+        
+            async for reply in dpm:
+                if thread_context['stop'].is_set():
+                    break
+                thread_context["pause"].wait()
+                if reply.isReading:
+                    one_data[reply.tag]= reply.data
+                    with thread_context['lock']:
+                        thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
                 if one_data.count(None)==0:
                     break
     return None
@@ -142,13 +168,16 @@ class phasescan:
 
         return dev_list
     
-    def acnet_daq_scan(self,thread_name,ramp_list,read_list,evt,role,scan_data):
-        thread_loop = asyncio.new_event_loop()
+    def _acnet_daq_scan(self,thread_name):
+        event_loop = asyncio.new_event_loop()
         try:
-            asyncio.set_event_loop(thread_loop)
-            acsys.run_client(set_many, ramp_list=ramp_list,read_list=read_list,evt=evt,settings_role=role,data=scan_data)
+            asyncio.set_event_loop(event_loop)
+            if len(thread_dict[thread_name]['ramp_list'])==0:
+                acsys.run_client(read_many, thread_context=self.thread_dict[thread_name])
+            else:
+                acsys.run_client(set_many, thread_context=self.thread_dict[thread_name])
         finally:
-            thread_loop.close()
+            event_loop.close()
             
     def _acnet_daq(self, thread_name):
         """Run the ACNet DAQ."""
@@ -167,11 +196,11 @@ class phasescan:
             self.thread_dict[thread_name]['data'].clear()
             return data
 
-    def start_thread(self, thread_name, param_list):
+    def start_thread(self, thread_name, param_list,ramp_list,role):
         """Start the thread."""
         print('Starting thread', thread_name)
         daq_thread = threading.Thread(
-            target=self._acnet_daq,
+            target=self._acnet_daq_scan,
             args=(thread_name,)
         )
 
@@ -180,6 +209,8 @@ class phasescan:
             'lock': threading.Lock(),
             'data': [None]*len(param_list),
             'paramlist': param_list,
+            'ramp_list':ramp_list,
+            'role':role,
             'pause': threading.Event(),
             'stop': threading.Event()
         }
@@ -261,10 +292,14 @@ class phasescan:
             print('Read device list empty')
         return read_list
         
-    def apply_settings(self,ramp_list,read_list,evt,thread_name,scan_data):
+    def apply_settings(self,thread_name,ramp_list,read_list,evt):
+        set_list = [s for s in ramp_list[0] if str(s).find(':')!=-1]
+        set_list=['%s.SETTING%s'%(l,evt) for l in set_list]
+        drf_list = set_list+['%s%s'%(l,evt) for l in read_list if len(read_list)!=0]
+
         print('Starting thread', thread_name)
-        daqthread = threading.Thread(target=self.acnet_daq_scan, args=(thread_name,ramp_list,read_list,evt,self.role,scan_data,))
-        daqthread.start()
+        #daqthread = threading.Thread(target=self.acnet_daq_scan, args=(thread_name,ramp_list,read_list,evt,self.role,scan_data,))
+        #daqthread.start()
 
 
     def fill_write_dataframe(self,data,filename):
