@@ -566,7 +566,7 @@ class TimePlot(QDialog):
         self.line_comboBox = QComboBox()
         self.line_comboBox.addItems(['solid','dashed','dashdot','dotted','none'])
         self.marker_comboBox = QComboBox()
-        self.marker_comboBox.addItems(['.','x','o','^','v','*','s','+','D'])
+        self.marker_comboBox.addItems(['','.','x','o','^','v','<','>','*','s','p','h','+','P','d','D'])
 
         self.comboBox = QComboBox()
         labels = [s.split('@')[0] for s in self.selected]
