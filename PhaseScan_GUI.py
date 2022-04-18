@@ -7,6 +7,7 @@ from phasescan import phasescan
 import numpy as np
 from datetime import datetime,timedelta
 
+import matplotlib.colors as mcolors
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -530,6 +531,21 @@ class Main(QMainWindow, Ui_MainWindow):
             dlg = BarPlot(selected,evt,'current',self)
             dlg.show()
 
+
+class CustomToolbar(NavigationToolbar):
+  def __init__(self, figure_canvas, parent= None):
+    self.toolitems = (
+        ('Home', 'Home', 'home', 'home'),
+        #('Back', 'Back', 'back', 'back'),              
+        #('Forward', 'Forward', 'forward', 'forward'),
+        ('Pan', 'Pan', 'move', 'pan'),
+        ('Zoom', 'Zoom', 'zoom_to_rect', 'zoom'),
+        #('Subplots', 'Config subplots', 'subplots', 'configure_subplots'),
+        ('Save', 'Save image', 'filesave', 'save_figure'),
+        )
+
+    NavigationToolbar.__init__(self, figure_canvas, parent= None)
+
             
 class TimePlot(QDialog):
     def __init__(self, selected,evt,parent=None):
@@ -541,19 +557,26 @@ class TimePlot(QDialog):
         self.thread = QUuid.createUuid().toString()
         self.selected = selected
         self.range_dict = {}
+        self.style_dict = {}
         
+        plt.rcParams["axes.titlelocation"] = 'right'
+
+        self.col_comboBox = QComboBox()
+        self.col_comboBox.addItems(mcolors.CSS4_COLORS.keys())
+        self.line_comboBox = QComboBox()
+        self.line_comboBox.addItems(['solid','dashed','dashdot','dotted','none'])
+        self.marker_comboBox = QComboBox()
+        self.marker_comboBox.addItems(['.','x','o','^','v','*','s','+','D'])
+
         self.comboBox = QComboBox()
         labels = [s.split('@')[0] for s in self.selected]
         self.comboBox.addItems(labels)
         
         self.setRange_pushButton = QPushButton('SetRange')
         self.setRange_pushButton.clicked.connect(self.set_range)
-        
-        self.hLayout0 = QHBoxLayout()
-        self.hLayout0.addWidget(self.comboBox)
-        self.hLayout0.addWidget(self.setRange_pushButton)
-        self.gridLayout = QGridLayout()
-        self.gridLayout.addLayout(self.hLayout0,0,0)
+
+        self.setStyle_pushButton = QPushButton('SetStyle')
+        self.setStyle_pushButton.clicked.connect(self.set_style)
 
         self.min_doubleSpinBox = QDoubleSpinBox()
         self.max_doubleSpinBox = QDoubleSpinBox()
@@ -563,15 +586,35 @@ class TimePlot(QDialog):
         self.max_doubleSpinBox.setMaximum(1000)
 
         self.minLabel = QLabel('MIN')
-        self.minLabel.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.minLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.maxLabel = QLabel('MAX')
-        self.maxLabel.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.maxLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.colLabel = QLabel('COLOR')
+        self.colLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lineLabel = QLabel('LINE')
+        self.lineLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.markerLabel = QLabel('MARKER')
+        self.markerLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        self.hLayout0 = QHBoxLayout()
+        self.hLayout0.addWidget(self.comboBox,3)
+        self.hLayout0.addWidget(self.minLabel,1)
+        self.hLayout0.addWidget(self.min_doubleSpinBox,2)
+        self.hLayout0.addWidget(self.maxLabel,1)
+        self.hLayout0.addWidget(self.max_doubleSpinBox,2)
+        self.hLayout0.addWidget(self.setRange_pushButton,2)
+        self.gridLayout = QGridLayout()
+        self.gridLayout.addLayout(self.hLayout0,0,0)
 
         self.hLayout1 = QHBoxLayout()
-        self.hLayout1.addWidget(self.minLabel)
-        self.hLayout1.addWidget(self.min_doubleSpinBox)
-        self.hLayout1.addWidget(self.maxLabel)
-        self.hLayout1.addWidget(self.max_doubleSpinBox)
+        self.hLayout1.addWidget(self.colLabel,1)
+        self.hLayout1.addWidget(self.col_comboBox,2)
+        self.hLayout1.addWidget(self.lineLabel,1)
+        self.hLayout1.addWidget(self.line_comboBox,2)
+        self.hLayout1.addWidget(self.markerLabel,1)
+        self.hLayout1.addWidget(self.marker_comboBox,2)
+        self.hLayout1.addWidget(self.setStyle_pushButton,2)
         self.gridLayout.addLayout(self.hLayout1,1,0)
 
         self.eventLabel = QLabel()
@@ -589,7 +632,7 @@ class TimePlot(QDialog):
         self.hLayout2.addWidget(self.eventLabel)
         self.hLayout2.addWidget(self.plot_pushButton)
         self.hLayout2.addWidget(self.close_pushButton)
-        self.gridLayout.addLayout(self.hLayout2,3,0)
+        self.gridLayout.addLayout(self.hLayout2,4,0)
         
         self.setLayout(self.gridLayout)
         self.init_plot()
@@ -613,14 +656,20 @@ class TimePlot(QDialog):
         for i in range(1,len(self.selected)):
             self.ax[i] = self.ax[0].twinx()
         self.canvas = FigureCanvas(self.fig)
-        self.gridLayout.addWidget(self.canvas,2,0)        
+        self.toolbar = CustomToolbar(self.canvas, self)
+        self.gridLayout.addWidget(self.toolbar,2,0)
+        self.gridLayout.addWidget(self.canvas,3,0)        
 
         self.timer = self.canvas.new_timer(50)
         self.timer.add_callback(self.update_plot)
         
     def set_range(self):
         self.range_dict.update({self.comboBox.currentText():{'ymin':self.min_doubleSpinBox.value(),'ymax':self.max_doubleSpinBox.value()}})
-        
+
+    def set_style(self):
+        self.style_dict.update({self.comboBox.currentText():{'c':self.col_comboBox.currentText(),
+                                                             'l':self.line_comboBox.currentText(),'m':self.marker_comboBox.currentText()}})
+
     def toggle_plot(self):
         if self.plot_pushButton.isChecked() and len(self.selected)>0:
             self.xaxes = [np.array([]) for i in range(len(self.selected))]
@@ -639,10 +688,8 @@ class TimePlot(QDialog):
         try:
             buffer = self.parent().phasescan.get_thread_data('%s'%self.thread)
             labels = [s.split('@')[0] for s in self.selected]
-
             colors = plt.rcParams['axes.prop_cycle']
             colors = colors.by_key()['color']
-            plt.rcParams["axes.titlelocation"] = 'right'
 
             data=[None]*len(labels)
             tstamps=[None]*len(labels)
@@ -654,12 +701,22 @@ class TimePlot(QDialog):
                 self.ax[i].cla()
                 self.ax[i].xaxis_date('US/Central')
                 space= space + '  '*len(labels[i-1]) if i>0 else ''
-                self.ax[i].set_title(labels[i]+space,color=colors[i],ha='right',fontsize='small')
                 self.xaxes[i] = np.append(self.xaxes[i],tstamps[i])
                 self.yaxes[i] = np.append(self.yaxes[i],d)
-                self.ax[i].plot(self.xaxes[i],self.yaxes[i],c=colors[i],label=labels[i])
-                self.ax[i].tick_params(axis='y', colors=colors[i], labelsize='small',rotation=90)
-                self.ax[i].yaxis.set_major_locator(MaxNLocator(5))
+
+                self.ax[i].yaxis.set_major_locator(MaxNLocator(5))                
+                if labels[i] not in self.style_dict.keys():
+                    self.ax[i].set_title(labels[i]+space,color=colors[i],ha='right',fontsize='small')                                
+                    self.ax[i].plot(self.xaxes[i],self.yaxes[i],c=colors[i],label=labels[i])
+                    self.ax[i].tick_params(axis='y', colors=colors[i], labelsize='small',rotation=90)
+
+                else:
+                    self.ax[i].set_title(labels[i]+space,color=self.style_dict[labels[i]]['c'],ha='right',fontsize='small')                                
+                    self.ax[i].plot(self.xaxes[i],self.yaxes[i],c=self.style_dict[labels[i]]['c'], linestyle=self.style_dict[labels[i]]['l'],
+                                    marker=self.style_dict[labels[i]]['m'],label=labels[i])
+                    self.ax[i].tick_params(axis='y', colors=self.style_dict[labels[i]]['c'], labelsize='small',rotation=90)
+
+
                 if labels[i] in self.range_dict.keys():
                     self.ax[i].set_ylim(self.range_dict[labels[i]]['ymin'],self.range_dict[labels[i]]['ymax'])
 
