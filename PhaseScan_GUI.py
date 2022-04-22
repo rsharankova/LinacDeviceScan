@@ -181,6 +181,7 @@ class Main(QMainWindow, Ui_MainWindow):
 
         ### DEVICE LIST FOR PLOTS ###
         self.add_pushButton.clicked.connect(self.add_list_item)
+        self.addS_pushButton.clicked.connect(self.add_set_list_item)
         self.remove_pushButton.clicked.connect(self.remove_list_item)
 
         ### RAMP LIST BUTTONS ###
@@ -273,28 +274,39 @@ class Main(QMainWindow, Ui_MainWindow):
         child = [self.findChild(cl,ob) for cl,ob in zip(classes,objs)]
         for i,c in enumerate(child):
             if isinstance(c,classes[i]):
-                #print(c.objectName())
                 c.deleteLater()
                 c = None
         
     def add_list_item(self):
         tx=self.searchbar.text()
         self.searchbar.setText("")
-        rows = sorted(set(index.row() for index in
-                      self.table.selectedIndexes()))
+        #rows = sorted(set(index.row() for index in
+        #              self.table.selectedIndexes()))
 
         for dev in self.table.selectedIndexes():
-            self.listWidget.addItem(dev.data())
+            if len(self.listWidget.findItems(dev.data(),Qt.MatchFlag.MatchExactly))==0:
+             self.listWidget.addItem(dev.data())
 
-        for row in sorted(rows, reverse=True):
-            self.model.removeRow(row)
+        #for row in sorted(rows, reverse=True):
+        #    self.model.removeRow(row)
+
+        self.searchbar.setText("Start typing device name")
+        self.searchbar.setText(tx)
+
+    def add_set_list_item(self):
+        tx=self.searchbar.text()
+        self.searchbar.setText("")
+
+        for dev in self.table.selectedIndexes():
+            if len(self.listWidget.findItems(dev.data(),Qt.MatchFlag.MatchExactly))==0:
+             self.listWidget.addItem('%s.SETTING'%dev.data())
 
         self.searchbar.setText("Start typing device name")
         self.searchbar.setText(tx)
 
     def remove_list_item(self):
         for dev in self.listWidget.selectedItems():
-            self.model.addRow(dev.text())
+            #self.model.addRow(dev.text())
             self.listWidget.takeItem(self.listWidget.row(dev))
         tx=self.searchbar.text()
         self.searchbar.setText("Start typing device name")
@@ -629,9 +641,9 @@ class TimePlot(QDialog):
         self.close_pushButton.clicked.connect(self.close_dialog)
         
         self.hLayout2 = QHBoxLayout()
-        self.hLayout2.addWidget(self.eventLabel)
-        self.hLayout2.addWidget(self.plot_pushButton)
-        self.hLayout2.addWidget(self.close_pushButton)
+        self.hLayout2.addWidget(self.eventLabel,1)
+        self.hLayout2.addWidget(self.plot_pushButton,2)
+        self.hLayout2.addWidget(self.close_pushButton,2)
         self.gridLayout.addLayout(self.hLayout2,4,0)
         
         self.setLayout(self.gridLayout)
@@ -657,7 +669,8 @@ class TimePlot(QDialog):
             self.ax[i] = self.ax[0].twinx()
         self.canvas = FigureCanvas(self.fig)
         self.toolbar = CustomToolbar(self.canvas, self)
-        self.gridLayout.addWidget(self.toolbar,2,0)
+        #self.gridLayout.addWidget(self.toolbar,2,0)
+        self.hLayout2.addWidget(self.toolbar,4)
         self.gridLayout.addWidget(self.canvas,3,0)        
 
         self.timer = self.canvas.new_timer(50)

@@ -70,9 +70,28 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
-          <widget class="QPushButton" name="add_pushButton">
+          <widget class="QPushButton" name="addS_pushButton">
+           <property name="toolTip">
+            <string extracomment="plot setting property"/>
+           </property>
+           <property name="toolTipDuration">
+            <number>2</number>
+           </property>
            <property name="text">
-            <string>&gt;&gt;&gt;</string>
+            <string>S &gt;&gt;&gt;</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="add_pushButton">
+           <property name="toolTip">
+            <string extracomment="plot reading property"/>
+           </property>
+           <property name="toolTipDuration">
+            <number>2</number>
+           </property>
+           <property name="text">
+            <string>R &gt;&gt;&gt;</string>
            </property>
           </widget>
          </item>
