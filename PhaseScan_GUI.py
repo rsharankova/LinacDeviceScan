@@ -681,7 +681,7 @@ class TimePlot(QDialog):
             
 
     def zoom_pan_press(self,event):
-        if event.name=="figure_enter_event" or event.button!=1 or event.inaxes!=self.ax[0]:
+        if event.name=="figure_enter_event" or event.button!=1 or event.inaxes!=self.ax[-1]:
             return
         if self.bzoom.isChecked():
             self.fig.canvas.toolbar.press_zoom(event)
