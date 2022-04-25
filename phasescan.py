@@ -28,33 +28,6 @@ async def set_once(con,drf_list,value_list,settings_role):
 
     return None
 
-'''
-async def set_many(con,ramp_list,read_list,evt,settings_role,data):
-    async with acsys.dpm.DPMContext(con) as dpm:
-        await dpm.enable_settings(role=settings_role)
-
-        set_list = [s for s in ramp_list[0] if str(s).find(':')!=-1]
-        set_list=['%s.SETTING%s'%(l,evt) for l in set_list]
-        drf_list = set_list+['%s%s'%(l,evt) for l in read_list if len(read_list)!=0]
-
-        for i, dev in enumerate(drf_list):
-            await dpm.add_entry(i, dev)
-
-        await dpm.start()
-
-        for rr in ramp_list:
-            one_data = [None]*len(drf_list)
-            setpairs = list(enumerate([n for n in rr if isinstance(n,float)]))
-            await dpm.apply_settings(setpairs)
-        
-            async for reply in dpm:
-                if reply.isReading:
-                    one_data[reply.tag]= reply.data
-                    data.append({'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
-                if one_data.count(None)==0:
-                    break
-    return None
-'''
 
 async def set_many(con,thread_context):
     async with acsys.dpm.DPMContext(con) as dpm:
@@ -76,7 +49,9 @@ async def set_many(con,thread_context):
                 if reply.isReading:
                     one_data[reply.tag]= reply.data
                     with thread_context['lock']:
-                        thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
+                        #thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
+                        thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,
+                                                       'name':thread_context['param_list'][reply.tag].split('@')[0]})
                 if one_data.count(None)==0:
                     break
         print("Ended ramp")
@@ -105,21 +80,23 @@ async def read_many(con, thread_context):
 
         it = int(thread_context['Nmeas'])*len(thread_context['param_list'])
         await dpm.start()
-        async for evt_res in dpm:
+        async for reply in dpm:
             if thread_context['stop'].is_set():
                 break
             thread_context["pause"].wait()
-            if evt_res.isReading:
+            if reply.isReading:
                 it = it-1
                 with thread_context['lock']:
-                    thread_context['data'].append({'tag':evt_res.tag,'stamp':evt_res.stamp,'data': evt_res.data,'name':evt_res.meta['name']})
+                    #thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
+                    thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,
+                                                   'name':thread_context['param_list'][reply.tag].split('@')[0]})
                     if (len(thread_context['data'])>5000000):
                         print("Buffer overflow, deleting",thread_context['data'][0]['name'],thread_context['data'][0]['name'])
                         thread_context['data'].pop(0)
-            elif evt_res.isStatus:
-                print(f'Status: {evt_res}')
+            elif reply.isStatus:
+                print(f'Status: {reply}')
             else:
-                print(f'Unknown response: {evt_res}')
+                print(f'Unknown response: {reply}')
             if it==0:
                 thread_context['stop'].set()
 

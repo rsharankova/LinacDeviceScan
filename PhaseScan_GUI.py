@@ -317,7 +317,7 @@ class Main(QMainWindow, Ui_MainWindow):
         if self.debug_pushButton.isChecked():
             self.stackedWidget.setCurrentIndex(2)
             self.phasescan.swap_dict()
-            self.listWidget.addItem('Z:CUBE_X')
+            self.listWidget.addItem('Z:CUBE_X.SETTING')
             self.listWidget.addItem('Z:CUBE_Y')
             self.listWidget.addItem('Z:CUBE_Z')
 
@@ -564,7 +564,7 @@ class TimePlot(QDialog):
         super().__init__(parent)
 
         self.setWindowTitle("Time plot")
-        self.resize(930,550)
+        self.resize(930,650)
 
         self.thread = QUuid.createUuid().toString()
         self.selected = selected
@@ -609,26 +609,6 @@ class TimePlot(QDialog):
         self.markerLabel = QLabel('MARKER')
         self.markerLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        self.hLayout0 = QHBoxLayout()
-        self.hLayout0.addWidget(self.comboBox,3)
-        self.hLayout0.addWidget(self.minLabel,1)
-        self.hLayout0.addWidget(self.min_doubleSpinBox,2)
-        self.hLayout0.addWidget(self.maxLabel,1)
-        self.hLayout0.addWidget(self.max_doubleSpinBox,2)
-        self.hLayout0.addWidget(self.setRange_pushButton,2)
-        self.gridLayout = QGridLayout()
-        self.gridLayout.addLayout(self.hLayout0,0,0)
-
-        self.hLayout1 = QHBoxLayout()
-        self.hLayout1.addWidget(self.colLabel,1)
-        self.hLayout1.addWidget(self.col_comboBox,2)
-        self.hLayout1.addWidget(self.lineLabel,1)
-        self.hLayout1.addWidget(self.line_comboBox,2)
-        self.hLayout1.addWidget(self.markerLabel,1)
-        self.hLayout1.addWidget(self.marker_comboBox,2)
-        self.hLayout1.addWidget(self.setStyle_pushButton,2)
-        self.gridLayout.addLayout(self.hLayout1,1,0)
-
         self.eventLabel = QLabel()
         self.eventLabel.setText('%s'%evt)
         self.eventLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -640,11 +620,27 @@ class TimePlot(QDialog):
         self.close_pushButton=QPushButton('Close')
         self.close_pushButton.clicked.connect(self.close_dialog)
         
+        self.gridLayout0 = QGridLayout()
+        self.gridLayout0.addWidget(self.comboBox,0,0,1,3)
+        self.gridLayout0.addWidget(self.minLabel,0,3,1,1)
+        self.gridLayout0.addWidget(self.min_doubleSpinBox,0,4,1,2)
+        self.gridLayout0.addWidget(self.maxLabel,0,6,1,1)
+        self.gridLayout0.addWidget(self.max_doubleSpinBox,0,7,1,2)
+        self.gridLayout0.addWidget(self.setRange_pushButton,0,9,1,2)
+        self.gridLayout0.addWidget(self.colLabel,1,0,1,1)
+        self.gridLayout0.addWidget(self.col_comboBox,1,1,1,2)
+        self.gridLayout0.addWidget(self.lineLabel,1,3,1,1)
+        self.gridLayout0.addWidget(self.line_comboBox,1,4,1,2)
+        self.gridLayout0.addWidget(self.markerLabel,1,6,1,1)
+        self.gridLayout0.addWidget(self.marker_comboBox,1,7,1,2)
+        self.gridLayout0.addWidget(self.setStyle_pushButton,1,9,1,2)
+        
         self.hLayout2 = QHBoxLayout()
-        self.hLayout2.addWidget(self.eventLabel,1)
-        self.hLayout2.addWidget(self.plot_pushButton,2)
-        self.hLayout2.addWidget(self.close_pushButton,2)
-        self.gridLayout.addLayout(self.hLayout2,4,0)
+        self.hLayout2.addWidget(self.eventLabel)
+
+        self.gridLayout = QGridLayout()
+        self.gridLayout.addLayout(self.gridLayout0,0,0)
+        self.gridLayout.addLayout(self.hLayout2,2,0)
         
         self.setLayout(self.gridLayout)
         self.init_plot()
@@ -659,19 +655,80 @@ class TimePlot(QDialog):
         self.close_dialog()
         event.accept()
 
+    def save_fig(self,event):
+        fout = QFileDialog.getSaveFileName(
+            self, "Save Image", "image", "Images (*.png *.jpg *.pdf);; All Files (*.*)") 
+
+        self.fig.savefig(fout[0])
+
+    def toggle_zoom(self,event):
+        self.bzoom.setChecked(True)
+        self.bpan.setChecked(False)
+
+    def toggle_pan(self,event):
+        self.bzoom.setChecked(False)
+        self.bpan.setChecked(True)
+
+    def zoom_pan(self,event):
+        if event.button!=1 or event.inaxes!=self.ax:
+            return
+        if self.bzoom.isChecked():
+            self.fig.canvas.toolbar.drag_zoom(event)
+        else:
+            self.fig.canvas.toolbar.drag_pan(event)
+
+    def zoom_pan_press(self,event):
+        if event.name=="figure_enter_event" or event.button!=1 or event.inaxes!=self.ax:
+            return
+        if self.bzoom.isChecked():
+            self.fig.canvas.toolbar.press_zoom(event)
+        else:
+            self.fig.canvas.toolbar.press_pan(event)
+
+    def zoom_pan_release(self,event):
+        if self.bzoom.isChecked():
+            self.fig.canvas.toolbar.release_zoom(event)
+        else:
+            self.fig.canvas.toolbar.release_pan(event)
+
         
     def init_plot(self):
         self.fig = Figure()
-
         self.ax = [None]*len(self.selected)
         self.ax[0] = self.fig.add_subplot(111)
         for i in range(1,len(self.selected)):
             self.ax[i] = self.ax[0].twinx()
         self.canvas = FigureCanvas(self.fig)
-        self.toolbar = CustomToolbar(self.canvas, self)
-        #self.gridLayout.addWidget(self.toolbar,2,0)
-        self.hLayout2.addWidget(self.toolbar,4)
-        self.gridLayout.addWidget(self.canvas,3,0)        
+        #self.toolbar = CustomToolbar(self.canvas, self)
+        #self.hLayout2.addWidget(self.toolbar,4)
+
+        self.canvas.mpl_connect("button_press_event",self.zoom_pan_press)
+        self.canvas.mpl_connect("axes_enter_event",self.zoom_pan_press)
+        self.canvas.mpl_connect("button_release_event",self.zoom_pan_release)
+        self.canvas.mpl_connect("motion_notify_event",self.zoom_pan)
+        toolbar=NavigationToolbar(self.canvas, parent= None)
+
+        self.bhome=QPushButton('Home',self)
+        self.bhome.clicked.connect(self.fig.canvas.toolbar.home)
+        self.bzoom=QPushButton('Zoom',self)
+        self.bzoom.setCheckable(True)
+        self.bzoom.setChecked(True)
+        self.bzoom.clicked.connect(self.toggle_zoom)
+        self.bpan =QPushButton('Pan',self)
+        self.bpan.setCheckable(True)
+        self.bpan.setChecked(False)
+        self.bpan.clicked.connect(self.toggle_pan)
+        self.bsave=QPushButton('Save',self)
+        self.bsave.clicked.connect(self.save_fig)
+        
+        self.hLayout2.addWidget(self.plot_pushButton)
+        self.hLayout2.addWidget(self.bhome)
+        self.hLayout2.addWidget(self.bzoom)
+        self.hLayout2.addWidget(self.bpan)
+        self.hLayout2.addWidget(self.bsave)
+        self.hLayout2.addWidget(self.close_pushButton)
+
+        self.gridLayout.addWidget(self.canvas,1,0)        
 
         self.timer = self.canvas.new_timer(50)
         self.timer.add_callback(self.update_plot)
@@ -701,6 +758,7 @@ class TimePlot(QDialog):
         try:
             buffer = self.parent().phasescan.get_thread_data('%s'%self.thread)
             labels = [s.split('@')[0] for s in self.selected]
+            titles = [s.split('.')[0].replace(':','_') if s.find('SET')!=-1 else s for s in labels ]
             colors = plt.rcParams['axes.prop_cycle']
             colors = colors.by_key()['color']
 
@@ -713,18 +771,18 @@ class TimePlot(QDialog):
             for i,d in enumerate(data):
                 self.ax[i].cla()
                 self.ax[i].xaxis_date('US/Central')
-                space= space + '  '*len(labels[i-1]) if i>0 else ''
+                space= space + '  '*len(titles[i-1]) if i>0 else ''
                 self.xaxes[i] = np.append(self.xaxes[i],tstamps[i])
                 self.yaxes[i] = np.append(self.yaxes[i],d)
 
                 self.ax[i].yaxis.set_major_locator(MaxNLocator(5))                
                 if labels[i] not in self.style_dict.keys():
-                    self.ax[i].set_title(labels[i]+space,color=colors[i],ha='right',fontsize='small')                                
-                    self.ax[i].plot(self.xaxes[i],self.yaxes[i],c=colors[i],label=labels[i])
+                    self.ax[i].set_title(titles[i]+space,color=colors[i],ha='right',fontsize='small')                                
+                    self.ax[i].plot(self.xaxes[i],self.yaxes[i],c=colors[i],label=titles[i])
                     self.ax[i].tick_params(axis='y', colors=colors[i], labelsize='small',rotation=90)
 
                 else:
-                    self.ax[i].set_title(labels[i]+space,color=self.style_dict[labels[i]]['c'],ha='right',fontsize='small')                                
+                    self.ax[i].set_title(titles[i]+space,color=self.style_dict[labels[i]]['c'],ha='right',fontsize='small')                                
                     self.ax[i].plot(self.xaxes[i],self.yaxes[i],c=self.style_dict[labels[i]]['c'], linestyle=self.style_dict[labels[i]]['l'],
                                     marker=self.style_dict[labels[i]]['m'],label=labels[i])
                     self.ax[i].tick_params(axis='y', colors=self.style_dict[labels[i]]['c'], labelsize='small',rotation=90)
@@ -842,7 +900,7 @@ class BarPlot(QDialog):
                 self.first_data = self.data.copy()
                 self.first=False
 
-            colors = ['green' if self.data[i] < self.first_data[i] else 'red' for i in range(len(self.first_data))]
+            colors = ['green' if abs(self.data[i]) < abs(self.first_data[i]) else 'red' for i in range(len(self.first_data))]
             self.ax.bar([i for i in range(len(self.first_data))],height=np.subtract(self.first_data,self.data),bottom = self.data,alpha=0.99,color=colors)
             self.ax.bar([i for i in range(len(self.data))],height=self.data,alpha=0.5,color='blue')
             labels = [s.split('@')[0] for s in self.selected]
