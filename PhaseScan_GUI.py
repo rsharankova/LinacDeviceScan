@@ -1,7 +1,7 @@
 from PyQt6.uic import loadUiType, loadUi
 from PyQt6.QtWidgets import QFileDialog, QWidget, QCheckBox, QSpinBox, QDoubleSpinBox,QPlainTextEdit, QDialog, QComboBox, QCompleter, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, QPushButton
-from PyQt6.QtCore import Qt, QUuid, QRegularExpression,QSortFilterProxyModel
-from PyQt6.QtGui import QStandardItemModel,QStandardItem
+from PyQt6.QtCore import Qt, QUuid, QRegularExpression, QSortFilterProxyModel, QSize
+from PyQt6.QtGui import QStandardItemModel,QStandardItem, QIcon
 from phasescan import phasescan
 
 import numpy as np
@@ -613,11 +613,13 @@ class TimePlot(QDialog):
         self.eventLabel.setText('%s'%evt)
         self.eventLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        self.plot_pushButton=QPushButton('Plot')
+        self.plot_pushButton=QPushButton('')
+        self.plot_pushButton.setIcon(QIcon("./icons/draw.png"))
         self.plot_pushButton.setCheckable(True)
         self.plot_pushButton.clicked.connect(self.toggle_plot)
 
-        self.close_pushButton=QPushButton('Close')
+        self.close_pushButton=QPushButton('')
+        self.close_pushButton.setIcon(QIcon("./icons/close.png"))
         self.close_pushButton.clicked.connect(self.close_dialog)
         
         self.gridLayout0 = QGridLayout()
@@ -676,9 +678,10 @@ class TimePlot(QDialog):
             self.fig.canvas.toolbar.drag_zoom(event)
         else:
             self.fig.canvas.toolbar.drag_pan(event)
+            
 
     def zoom_pan_press(self,event):
-        if event.name=="figure_enter_event" or event.button!=1 or event.inaxes!=self.ax:
+        if event.name=="figure_enter_event" or event.button!=1 or event.inaxes!=self.ax[0]:
             return
         if self.bzoom.isChecked():
             self.fig.canvas.toolbar.press_zoom(event)
@@ -708,17 +711,22 @@ class TimePlot(QDialog):
         self.canvas.mpl_connect("motion_notify_event",self.zoom_pan)
         toolbar=NavigationToolbar(self.canvas, parent= None)
 
-        self.bhome=QPushButton('Home',self)
+        self.bhome=QPushButton('',self)
+        self.bhome.setIcon(QIcon("./icons/home.png"))
+        #self.bhome.setIconSize(QSize(20, 20));
         self.bhome.clicked.connect(self.fig.canvas.toolbar.home)
-        self.bzoom=QPushButton('Zoom',self)
+        self.bzoom=QPushButton('',self)
+        self.bzoom.setIcon(QIcon("./icons/magnify-plus-cursor.png"))
         self.bzoom.setCheckable(True)
         self.bzoom.setChecked(True)
         self.bzoom.clicked.connect(self.toggle_zoom)
-        self.bpan =QPushButton('Pan',self)
+        self.bpan =QPushButton('',self)
+        self.bpan.setIcon(QIcon("./icons/pan.png"))
         self.bpan.setCheckable(True)
         self.bpan.setChecked(False)
         self.bpan.clicked.connect(self.toggle_pan)
-        self.bsave=QPushButton('Save',self)
+        self.bsave=QPushButton('',self)
+        self.bsave.setIcon(QIcon("./icons/content-save.png"))
         self.bsave.clicked.connect(self.save_fig)
         
         self.hLayout2.addWidget(self.plot_pushButton)
@@ -834,17 +842,19 @@ class BarPlot(QDialog):
         self.eventLabel.setText('%s'%evt)
         self.eventLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        self.plot_pushButton=QPushButton('Plot')
+
+        self.plot_pushButton=QPushButton('')
+        self.plot_pushButton.setIcon(QIcon("./icons/draw.png"))
         self.plot_pushButton.setCheckable(True)
         self.plot_pushButton.clicked.connect(self.toggle_plot)
 
-        self.close_pushButton=QPushButton('Close')
+        self.close_pushButton=QPushButton('')
+        self.close_pushButton.setIcon(QIcon("./icons/close.png"))
         self.close_pushButton.clicked.connect(self.close_dialog)
         
         self.hLayout = QHBoxLayout()
         self.hLayout.addWidget(self.eventLabel)
-        self.hLayout.addWidget(self.plot_pushButton)
-        self.hLayout.addWidget(self.close_pushButton)
+
         self.gridLayout = QGridLayout()
         self.gridLayout.addLayout(self.hLayout,1,0)
 
@@ -861,12 +871,40 @@ class BarPlot(QDialog):
     def closeEvent(self, event):
         self.close_dialog()
         event.accept()
+
+    def save_fig(self,event):
+        fout = QFileDialog.getSaveFileName(
+            self, "Save Image", "image", "Images (*.png *.jpg *.pdf);; All Files (*.*)") 
+
+        self.fig.savefig(fout[0])
+
         
     def init_plot(self):
         self.fig = Figure()
         self.ax = self.fig.add_subplot(111)
         self.canvas = FigureCanvas(self.fig)
         self.gridLayout.addWidget(self.canvas,0,0)
+
+        self.bhome=QPushButton('',self)
+        self.bhome.setIcon(QIcon("./icons/home.png"))
+        self.bhome.setDisabled(True)
+        #self.bhome.setIconSize(QSize(20, 20));
+        self.bzoom=QPushButton('',self)
+        self.bzoom.setIcon(QIcon("./icons/magnify-plus-cursor.png"))
+        self.bzoom.setDisabled(True)
+        self.bpan =QPushButton('',self)
+        self.bpan.setIcon(QIcon("./icons/pan.png"))
+        self.bpan.setDisabled(True)
+        self.bsave=QPushButton('',self)
+        self.bsave.setIcon(QIcon("./icons/content-save.png"))
+        self.bsave.clicked.connect(self.save_fig)
+        
+        self.hLayout.addWidget(self.plot_pushButton)
+        self.hLayout.addWidget(self.bhome)
+        self.hLayout.addWidget(self.bzoom)
+        self.hLayout.addWidget(self.bpan)
+        self.hLayout.addWidget(self.bsave)
+        self.hLayout.addWidget(self.close_pushButton)
 
         self.timer = self.canvas.new_timer(50)
         self.timer.add_callback(self.update_plot)
