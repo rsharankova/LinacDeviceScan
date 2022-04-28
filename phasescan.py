@@ -132,6 +132,7 @@ class phasescan:
 
         self.dev_list = self.read_dev_list()
         #self.dev_list = self.TORs+self.LMs
+        self.add_400MeV_devs()
                 
     def swap_dict(self):
         if self.param_dict==self.main_dict:
@@ -148,6 +149,33 @@ class phasescan:
         dev_list=[dev.strip() for dev in dev_list.splitlines() if devfilt.match(dev)]
 
         return dev_list
+
+    def add_400MeV_devs(self):
+        bdevs = []
+        #quads
+        bdevs.append('LAM')
+        [bdevs.append('Q%d'%i) for i in range(2,18)]
+        #htrims
+        bdevs.extend(['HTDEB','HTMV2','HTMH2','HTINJ1','HTINJ2'])
+        [bdevs.append('HTQ%d'%i) for i in range (3,14) if i not in [9,10,11]]
+        #vtrims
+        bdevs.extend(['VTDEB','VTMH22','VTINJ1','VTINJ2'])
+        [bdevs.append('VTQ%d'%i) for i in range (3,14) if i not in [9,10,11]]
+        #super trims
+        bdevs.extend(['STH1','STH2','STV1','STV2'])
+        #bends
+        bdevs.extend(['MH1','MH2','MV1','MV2'])
+        #horiz bpms
+        [bdevs.append('HPQ%d'%i) for i in range(1,18) if i!=11]
+        #vert bpms
+        [bdevs.append('VPQ%d'%i) for i in range(1,18)]
+        #phase bpms
+        [bdevs.append('BQ%dF'%i) for i in range(1,18)]
+
+        bdevs = ['B:%s'%dev for dev in bdevs]
+
+        self.dev_list.extend(bdevs)
+        
     
     def _acnet_daq_scan(self,thread_name):
         event_loop = asyncio.new_event_loop()

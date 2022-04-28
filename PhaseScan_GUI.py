@@ -5,6 +5,7 @@ from PyQt6.QtGui import QStandardItemModel,QStandardItem, QIcon
 from phasescan import phasescan
 
 import numpy as np
+import random
 from datetime import datetime,timedelta
 
 import matplotlib.colors as mcolors
@@ -280,15 +281,11 @@ class Main(QMainWindow, Ui_MainWindow):
     def add_list_item(self):
         tx=self.searchbar.text()
         self.searchbar.setText("")
-        #rows = sorted(set(index.row() for index in
-        #              self.table.selectedIndexes()))
 
         for dev in self.table.selectedIndexes():
             if len(self.listWidget.findItems(dev.data(),Qt.MatchFlag.MatchExactly))==0:
              self.listWidget.addItem(dev.data())
 
-        #for row in sorted(rows, reverse=True):
-        #    self.model.removeRow(row)
 
         self.searchbar.setText("Start typing device name")
         self.searchbar.setText(tx)
@@ -299,14 +296,13 @@ class Main(QMainWindow, Ui_MainWindow):
 
         for dev in self.table.selectedIndexes():
             if len(self.listWidget.findItems(dev.data(),Qt.MatchFlag.MatchExactly))==0:
-             self.listWidget.addItem('%s.SETTING'%dev.data())
+                self.listWidget.addItem(dev.data().replace(':','_'))
 
         self.searchbar.setText("Start typing device name")
         self.searchbar.setText(tx)
 
     def remove_list_item(self):
         for dev in self.listWidget.selectedItems():
-            #self.model.addRow(dev.text())
             self.listWidget.takeItem(self.listWidget.row(dev))
         tx=self.searchbar.text()
         self.searchbar.setText("Start typing device name")
@@ -317,7 +313,10 @@ class Main(QMainWindow, Ui_MainWindow):
         if self.debug_pushButton.isChecked():
             self.stackedWidget.setCurrentIndex(2)
             self.phasescan.swap_dict()
-            self.listWidget.addItem('Z:CUBE_X.SETTING')
+            self.listWidget.addItem('Z_CUBE_X')
+            self.listWidget.addItem('Z_CUBE_Y')
+            self.listWidget.addItem('Z_CUBE_Z')
+            self.listWidget.addItem('Z:CUBE_X')            
             self.listWidget.addItem('Z:CUBE_Y')
             self.listWidget.addItem('Z:CUBE_Z')
 
@@ -466,7 +465,7 @@ class Main(QMainWindow, Ui_MainWindow):
 
         self.reading()
 
-        set_list = ['%s.SETTING%s'%(s,evt) for s in self.ramplist[0] if str(s).find(':')!=-1] if len(self.ramplist)>0 else []
+        set_list = ['%s%s'%(s.replace(':','_'),evt) for s in self.ramplist[0] if str(s).find(':')!=-1] if len(self.ramplist)>0 else []
 
         drf_list = set_list+['%s%s'%(l,evt) for l in self.read_list if len(self.read_list)!=0]
 
@@ -572,9 +571,14 @@ class TimePlot(QDialog):
         self.style_dict = {}
         
         plt.rcParams["axes.titlelocation"] = 'right'
+        overlap = {name for name in mcolors.CSS4_COLORS
+           if f'xkcd:{name}' in mcolors.XKCD_COLORS}
+
+        overlap.difference_update(['aqua','white','ivory','lime','chocolate','gold'])
+        self.colors = [mcolors.XKCD_COLORS[f'xkcd:{color_name}'].upper() for color_name in sorted(overlap)]
 
         self.col_comboBox = QComboBox()
-        self.col_comboBox.addItems(mcolors.CSS4_COLORS.keys())
+        self.col_comboBox.addItems(sorted(overlap))
         self.line_comboBox = QComboBox()
         self.line_comboBox.addItems(['solid','dashed','dashdot','dotted','none'])
         self.marker_comboBox = QComboBox()
@@ -766,9 +770,6 @@ class TimePlot(QDialog):
         try:
             buffer = self.parent().phasescan.get_thread_data('%s'%self.thread)
             labels = [s.split('@')[0] for s in self.selected]
-            titles = [s.split('.')[0].replace(':','_') if s.find('SET')!=-1 else s for s in labels ]
-            colors = plt.rcParams['axes.prop_cycle']
-            colors = colors.by_key()['color']
 
             data=[None]*len(labels)
             tstamps=[None]*len(labels)
@@ -779,18 +780,18 @@ class TimePlot(QDialog):
             for i,d in enumerate(data):
                 self.ax[i].cla()
                 self.ax[i].xaxis_date('US/Central')
-                space= space + '  '*len(titles[i-1]) if i>0 else ''
+                space= space + '  '*len(labels[i-1]) if i>0 else ''
                 self.xaxes[i] = np.append(self.xaxes[i],tstamps[i])
                 self.yaxes[i] = np.append(self.yaxes[i],d)
 
-                self.ax[i].yaxis.set_major_locator(MaxNLocator(5))                
+                self.ax[i].yaxis.set_major_locator(MaxNLocator(5))
                 if labels[i] not in self.style_dict.keys():
-                    self.ax[i].set_title(titles[i]+space,color=colors[i],ha='right',fontsize='small')                                
-                    self.ax[i].plot(self.xaxes[i],self.yaxes[i],c=colors[i],label=titles[i])
-                    self.ax[i].tick_params(axis='y', colors=colors[i], labelsize='small',rotation=90)
+                    self.ax[i].set_title(labels[i]+space,color=self.colors[i],ha='right',fontsize='small')                                
+                    self.ax[i].plot(self.xaxes[i],self.yaxes[i],c=self.colors[i],label=labels[i])
+                    self.ax[i].tick_params(axis='y', colors=self.colors[i], labelsize='small',rotation=90)
 
                 else:
-                    self.ax[i].set_title(titles[i]+space,color=self.style_dict[labels[i]]['c'],ha='right',fontsize='small')                                
+                    self.ax[i].set_title(labels[i]+space,color=self.style_dict[labels[i]]['c'],ha='right',fontsize='small')                                
                     self.ax[i].plot(self.xaxes[i],self.yaxes[i],c=self.style_dict[labels[i]]['c'], linestyle=self.style_dict[labels[i]]['l'],
                                     marker=self.style_dict[labels[i]]['m'],label=labels[i])
                     self.ax[i].tick_params(axis='y', colors=self.style_dict[labels[i]]['c'], labelsize='small',rotation=90)
