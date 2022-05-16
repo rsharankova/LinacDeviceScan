@@ -295,7 +295,7 @@ class phasescan:
             lines = file.readlines()
             read_list = []
             for line in lines:
-                devs = [dev.strip('\n') for dev in line.split(',') if dev.find(':')!=-1 and isinstance(dev,str)] 
+                devs = [dev.strip('\n') for dev in line.split(',') if (dev.find(':')!=-1 or dev.find('_')!=-1) and isinstance(dev,str)] 
                 [read_list.append(dev) for dev in devs]
 
         except:
@@ -322,6 +322,27 @@ class phasescan:
         
         #today = date.today().isoformat()
         ddf.to_csv('%s'%(filename),index_label='idx')
+
+    def fill_write_dataframe_oneTS(self,data,filename):
+        df = pd.DataFrame.from_records(data)
+        devlist = df.name.unique()
+        dflist=[]
+        for dev in devlist:
+            dfdev= df[df.name==dev][['stamp','data']]
+            dfdev['stamp']= pd.to_datetime(dfdev['stamp'])
+            dfdev['TS']=dfdev['stamp']
+            dfdev.rename(columns={'data':dev, 'TS':'%s Timestamp'%dev},inplace=True)
+            dfdev.set_index('stamp').reset_index(drop=False, inplace=True)
+            dflist.append(dfdev)        
+        
+        ddf = reduce(lambda  left,right: pd.merge_asof(left,right,on=['stamp'],direction='nearest',tolerance=pd.Timedelta('10ms')), dflist)
+        #ddf.drop(columns=['stamp'], inplace=True)
+        ddf.rename(columns={'%s Timestamp'%devlist[0]:'Time'},inplace=True)
+        ddf.drop(list(ddf.filter(regex = 'stamp')), axis=1, inplace=True)
+        print( ddf.head() )
+        
+        #today = date.today().isoformat()
+        ddf.to_csv('%s'%(filename),index=False)
 
     
     def make_ramp_list(self,param_dict,numevents):
