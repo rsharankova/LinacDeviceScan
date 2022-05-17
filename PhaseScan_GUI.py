@@ -324,7 +324,7 @@ class Main(QMainWindow, Ui_MainWindow):
             self.stackedWidget.setCurrentIndex(0)
             self.phasescan.swap_dict()
             for i in reversed(range(self.listWidget.count())):
-                if self.listWidget.item(i).text().find('Z:')!=-1:
+                if self.listWidget.item(i).text().find('Z:')!=-1 or self.listWidget.item(i).text().find('Z_')!=-1:
                     self.listWidget.takeItem(i)
 
 
