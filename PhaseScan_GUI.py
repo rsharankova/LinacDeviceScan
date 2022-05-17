@@ -11,7 +11,7 @@ from datetime import datetime,timedelta
 import matplotlib.colors as mcolors
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
-from matplotlib.ticker import MaxNLocator
+import matplotlib.ticker as mt
 
 from matplotlib.backends.backend_qtagg import (
     FigureCanvas,
@@ -27,7 +27,6 @@ class ItemModel(QStandardItemModel):
         for i,word in enumerate(data):
             item = QStandardItem(word)
             self.setItem(i, 0, item)
-
 
 #### Searchable, auto-complete combobox ####
 class ExtendedCombo( QComboBox ):
@@ -107,9 +106,9 @@ class Main(QMainWindow, Ui_MainWindow):
 
         ### DEBUG PAGE ###
         debug_gridLayout = QGridLayout()
-        debug_gridLayout.addWidget(self.label_7,0,0,1,1)
-        debug_gridLayout.addWidget(self.label_8,0,1,1,1)
-        debug_gridLayout.addWidget(self.label_9,0,2,1,1)
+        debug_gridLayout.addWidget(self.label_7,0,1,1,1)
+        debug_gridLayout.addWidget(self.label_8,0,2,1,1)
+        debug_gridLayout.addWidget(self.label_9,0,3,1,1)
         debug_gridLayout.addWidget(self.cube_checkBox_1,1,0,1,1)
         debug_gridLayout.addWidget(self.cube_comboBox_1,1,1,1,1)
         debug_gridLayout.addWidget(self.cube_doubleSpinBox_1,1,2,1,1)
@@ -313,6 +312,7 @@ class Main(QMainWindow, Ui_MainWindow):
         if self.debug_pushButton.isChecked():
             self.stackedWidget.setCurrentIndex(2)
             self.phasescan.swap_dict()
+
             self.listWidget.addItem('Z_CUBE_X')
             self.listWidget.addItem('Z_CUBE_Y')
             self.listWidget.addItem('Z_CUBE_Z')
@@ -500,7 +500,7 @@ class Main(QMainWindow, Ui_MainWindow):
             self.scan_plainTextEdit.setPlainText('devicescan.csv')
         filename = self.scan_plainTextEdit.toPlainText()
         try:
-            self.phasescan.fill_write_dataframe(self.scanresults,filename)
+            self.phasescan.fill_write_dataframe(self.scanresults,self.read_list,filename)
             print('Wrote %s to disk'%filename)
         except Exception as e:
             print('Something went wrong',e)
@@ -571,10 +571,11 @@ class TimePlot(QDialog):
         self.style_dict = {}
         
         plt.rcParams["axes.titlelocation"] = 'right'
+        plt.style.use('dark_background')
         overlap = {name for name in mcolors.CSS4_COLORS
            if f'xkcd:{name}' in mcolors.XKCD_COLORS}
 
-        overlap.difference_update(['aqua','white','ivory','lime','chocolate','gold'])
+        overlap.difference_update(['aqua','white','black','lime','chocolate','gold'])
         self.colors = [mcolors.XKCD_COLORS[f'xkcd:{color_name}'].upper() for color_name in sorted(overlap)]
 
         self.col_comboBox = QComboBox()
@@ -703,6 +704,8 @@ class TimePlot(QDialog):
         self.fig = Figure()
         self.ax = [None]*len(self.selected)
         self.ax[0] = self.fig.add_subplot(111)
+        self.ax[0].xaxis.grid(True, which='major')
+        self.ax[0].yaxis.grid(True, which='major')
         for i in range(1,len(self.selected)):
             self.ax[i] = self.ax[0].twinx()
         self.canvas = FigureCanvas(self.fig)
@@ -777,14 +780,19 @@ class TimePlot(QDialog):
                 data[i]=[d['data'] for d in buffer if d['name']==labels[i]]
                 tstamps[i]=[d['stamp'] for d in buffer if d['name']==labels[i]]
 
+                
             for i,d in enumerate(data):
                 self.ax[i].cla()
+                if i==0:
+                    self.ax[i].xaxis.grid(True, which='major')
+                    self.ax[i].yaxis.grid(True, which='major')
+
                 self.ax[i].xaxis_date('US/Central')
                 space= space + '  '*len(labels[i-1]) if i>0 else ''
                 self.xaxes[i] = np.append(self.xaxes[i],tstamps[i])
                 self.yaxes[i] = np.append(self.yaxes[i],d)
 
-                self.ax[i].yaxis.set_major_locator(MaxNLocator(5))
+                #self.ax[i].yaxis.set_major_locator(MaxNLocator(5))
                 if labels[i] not in self.style_dict.keys():
                     self.ax[i].set_title(labels[i]+space,color=self.colors[i],ha='right',fontsize='small')                                
                     self.ax[i].plot(self.xaxes[i],self.yaxes[i],c=self.colors[i],label=labels[i])
@@ -796,7 +804,8 @@ class TimePlot(QDialog):
                                     marker=self.style_dict[labels[i]]['m'],label=labels[i])
                     self.ax[i].tick_params(axis='y', colors=self.style_dict[labels[i]]['c'], labelsize='small',rotation=90)
 
-
+                self.ax[i].yaxis.set_major_locator(mt.LinearLocator(5))
+                
                 if labels[i] in self.range_dict.keys():
                     self.ax[i].set_ylim(self.range_dict[labels[i]]['ymin'],self.range_dict[labels[i]]['ymax'])
 

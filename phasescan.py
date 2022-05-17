@@ -32,7 +32,7 @@ async def set_once(con,drf_list,value_list,settings_role):
 async def set_many(con,thread_context):
     async with acsys.dpm.DPMContext(con) as dpm:
         await dpm.enable_settings(role=thread_context['role'])
-
+        
         await dpm.add_entries(list(enumerate(thread_context['param_list'])))
 
         await dpm.start()
@@ -226,7 +226,7 @@ class phasescan:
             'stop': threading.Event()
         }
         self.thread_dict[thread_name]['pause'].set() #not paused when set
-        
+
         daq_thread.start()
 
     def stop_thread(self, thread_name):
@@ -304,17 +304,18 @@ class phasescan:
         return read_list
         
 
-    def fill_write_dataframe(self,data,filename):
+    def fill_write_dataframe(self,data,read_list,filename):
         df = pd.DataFrame.from_records(data)
         devlist = df.name.unique()
         dflist=[]
-        for dev in devlist:
-            dfdev= df[df.name==dev][['stamp','data']]
-            dfdev['stamp']= pd.to_datetime(dfdev['stamp'])
-            dfdev['TS']=dfdev['stamp']
-            dfdev.rename(columns={'data':dev, 'TS':'%s Timestamp'%dev},inplace=True)
-            dfdev.set_index('stamp').reset_index(drop=False, inplace=True)
-            dflist.append(dfdev)        
+        for dev in read_list:
+            if dev in devlist:
+                dfdev= df[df.name==dev][['stamp','data']]
+                dfdev['stamp']= pd.to_datetime(dfdev['stamp'])
+                dfdev['TS']=dfdev['stamp']
+                dfdev.rename(columns={'data':dev, 'TS':'%s Timestamp'%dev},inplace=True)
+                dfdev.set_index('stamp').reset_index(drop=False, inplace=True)
+                dflist.append(dfdev)        
         
         ddf = reduce(lambda  left,right: pd.merge_asof(left,right,on=['stamp'],direction='nearest',tolerance=pd.Timedelta('10ms')), dflist)
         ddf.drop(columns=['stamp'], inplace=True)
@@ -323,22 +324,20 @@ class phasescan:
         #today = date.today().isoformat()
         ddf.to_csv('%s'%(filename),index_label='idx')
 
-    def fill_write_dataframe_oneTS(self,data,filename):
+    def fill_write_dataframe_oneTS(self,data,read_list,filename):
         df = pd.DataFrame.from_records(data)
         devlist = df.name.unique()
-        dflist=[]
-        for dev in devlist:
-            dfdev= df[df.name==dev][['stamp','data']]
-            dfdev['stamp']= pd.to_datetime(dfdev['stamp'])
-            dfdev['TS']=dfdev['stamp']
-            dfdev.rename(columns={'data':dev, 'TS':'%s Timestamp'%dev},inplace=True)
-            dfdev.set_index('stamp').reset_index(drop=False, inplace=True)
-            dflist.append(dfdev)        
         
-        ddf = reduce(lambda  left,right: pd.merge_asof(left,right,on=['stamp'],direction='nearest',tolerance=pd.Timedelta('10ms')), dflist)
-        #ddf.drop(columns=['stamp'], inplace=True)
-        ddf.rename(columns={'%s Timestamp'%devlist[0]:'Time'},inplace=True)
-        ddf.drop(list(ddf.filter(regex = 'stamp')), axis=1, inplace=True)
+        dflist=[]
+        for dev in read_list:
+            if dev in devlist:
+                dfdev= df[df.name==dev][['stamp','data']]
+                dfdev['stamp']= pd.to_datetime(dfdev['stamp'])
+                dfdev.rename(columns={'data':dev,'stamp':'Time'},inplace=True)
+                dfdev.set_index('Time').reset_index(drop=False, inplace=True)
+                dflist.append(dfdev)        
+        
+        ddf = reduce(lambda  left,right: pd.merge_asof(left,right,on=['Time'],direction='nearest',tolerance=pd.Timedelta('10ms')), dflist)
         print( ddf.head() )
         
         #today = date.today().isoformat()

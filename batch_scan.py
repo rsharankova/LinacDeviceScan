@@ -51,7 +51,7 @@ def main():
     while len(ps.get_list_of_threads())>0:
         scanresults.extend(ps.get_thread_data('%s'%thread))
     try:
-        ps.fill_write_dataframe_oneTS(scanresults,outfile)
+        ps.fill_write_dataframe_oneTS(scanresults,read_list,outfile)
     except Exception as e:
         print('Something went wrong',e)
 
