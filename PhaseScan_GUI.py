@@ -261,6 +261,10 @@ class Main(QMainWindow, Ui_MainWindow):
         stepsSpinBox.setObjectName('steps_spinBox_%d'%num)
         self.dev_groupBox.layout().addWidget(stepsSpinBox,row,3,1,1)
 
+        checkBox.toggled.connect(self.add_param)
+        doubleSpinBox.valueChanged.connect(self.read_deltas)
+        stepsSpinBox.valueChanged.connect(self.read_steps)
+
         
     def remove_device(self):
         num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')==-1]))
@@ -348,7 +352,7 @@ class Main(QMainWindow, Ui_MainWindow):
             prefix = 'dev'
             num = int(len([cb for cb in self.findChildren(QCheckBox) if cb.objectName().find('cube')==-1]))+1
             
-        [self.phasescan.param_dict.update({self.findChild(QComboBox,'%s_comboBox_%d'%(prefix,i)).currentText().split(':')[0]:
+        [self.phasescan.param_dict.update({self.findChild(QComboBox,'%s_comboBox_%d'%(prefix,i)).currentText().split(':')[1]:
                                            {'device':self.findChild(QComboBox,'%s_comboBox_%d'%(prefix,i)).currentText(),'idx':i,'selected':False,'phase':0,'delta':0,'steps':2}})
          for i in range(1,num) if self.findChild(QCheckBox,'%s_checkBox_%d'%(prefix,i)).isChecked()
          and self.findChild(QComboBox,'%s_comboBox_%d'%(prefix,i)).currentText() not in self.phasescan.param_dict]
@@ -359,12 +363,12 @@ class Main(QMainWindow, Ui_MainWindow):
                 comboBox = self.findChild(QComboBox,'%s_comboBox_%d'%(prefix,i))
                 if checkBox.isChecked():
                     comboBox.setEnabled(False)
-                    if comboBox.currentText()==key:
+                    if comboBox.currentText().split(':')[1]==key:
                         self.phasescan.param_dict[key]['selected']=True
 
                 elif checkBox.isChecked()==False:
                     comboBox.setEnabled(True)
-                    if comboBox.currentText()==key:
+                    if comboBox.currentText().split(':')[1]==key:
                         self.phasescan.param_dict[key]['selected']=False
                         self.phasescan.param_dict[key]['phase']=0
             

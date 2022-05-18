@@ -120,9 +120,9 @@ class phasescan:
                           'V3QSET':{'device':'L:V3QSET','idx':5,'selected':False,'phase':0,'delta':0,'steps':2},
                           'V4QSET':{'device':'L:V4QSET','idx':6,'selected':False,'phase':0,'delta':0,'steps':2},
                           'V5QSET':{'device':'L:V5QSET','idx':7,'selected':False,'phase':0,'delta':0,'steps':2}}
-        self.debug_dict={'Z:CUBE_X':{'device':'Z:CUBE_X','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
-                         'Z:CUBE_Y':{'device':'Z:CUBE_Y','idx':2,'selected':False,'phase':0,'delta':0,'steps':2},
-                         'Z:CUBE_Z':{'device':'Z:CUBE_Z','idx':3,'selected':False,'phase':0,'delta':0,'steps':2}}
+        self.debug_dict={'CUBE_X':{'device':'Z:CUBE_X','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
+                         'CUBE_Y':{'device':'Z:CUBE_Y','idx':2,'selected':False,'phase':0,'delta':0,'steps':2},
+                         'CUBE_Z':{'device':'Z:CUBE_Z','idx':3,'selected':False,'phase':0,'delta':0,'steps':2}}
 
         self.param_dict=self.main_dict
 
@@ -166,11 +166,17 @@ class phasescan:
         #bends
         bdevs.extend(['MH1','MH2','MV1','MV2'])
         #horiz bpms
+        bdevs.extend(['HPLAM','HPDEB','HPINJ'])
         [bdevs.append('HPQ%d'%i) for i in range(1,18) if i!=11]
         #vert bpms
+        bdevs.extend(['VPLAM','VPDEB','VPINJ'])
         [bdevs.append('VPQ%d'%i) for i in range(1,18)]
         #phase bpms
+        bdevs.extend(['BLAMF','BDEBF','BINJF'])
         [bdevs.append('BQ%dF'%i) for i in range(1,18)]
+        #intensity bpms
+        bdevs.extend(['LAMINT','DEBINT','INJINT'])
+        [bdevs.append('Q%dINT'%i) for i in range(1,18)]
 
         bdevs = ['B:%s'%dev for dev in bdevs]
 

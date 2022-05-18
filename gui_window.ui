@@ -202,7 +202,7 @@
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="page_main">
         <property name="sizePolicy">
@@ -370,7 +370,7 @@
           </property>
           <item>
            <property name="text">
-            <string>RFQPAH</string>
+            <string>L:RFQPAH</string>
            </property>
           </item>
          </widget>
@@ -457,7 +457,7 @@
           </property>
           <item>
            <property name="text">
-            <string>RFBPAH</string>
+            <string>L:RFBPAH</string>
            </property>
           </item>
          </widget>
@@ -538,7 +538,7 @@
           </property>
           <item>
            <property name="text">
-            <string>V1QSET</string>
+            <string>L:V1QSET</string>
            </property>
           </item>
          </widget>
@@ -619,7 +619,7 @@
           </property>
           <item>
            <property name="text">
-            <string>V2QSET</string>
+            <string>L:V2QSET</string>
            </property>
           </item>
          </widget>
@@ -700,7 +700,7 @@
           </property>
           <item>
            <property name="text">
-            <string>V3QSET</string>
+            <string>L:V3QSET</string>
            </property>
           </item>
          </widget>
@@ -781,7 +781,7 @@
           </property>
           <item>
            <property name="text">
-            <string>V4QSET</string>
+            <string>L:V4QSET</string>
            </property>
           </item>
          </widget>
@@ -862,7 +862,7 @@
           </property>
           <item>
            <property name="text">
-            <string>V5QSET</string>
+            <string>L:V5QSET</string>
            </property>
           </item>
          </widget>
