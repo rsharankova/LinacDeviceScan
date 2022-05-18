@@ -166,11 +166,6 @@ class Main(QMainWindow, Ui_MainWindow):
         #### BOX TOGGLE ACTIONS ####
         for checkBox in self.findChildren(QCheckBox):
             checkBox.toggled.connect(self.add_param)
-        for dspinBox in self.findChildren(QDoubleSpinBox):
-            dspinBox.valueChanged.connect(self.read_deltas)
-        for spinBox in self.findChildren(QSpinBox):
-            if spinBox.objectName().find('steps')!=-1:
-                spinBox.valueChanged.connect(self.read_steps)
 
         #### BUTTON ACTIONS ####
         ### SELECT/CLEAR ALL BUTTONS ###
@@ -262,8 +257,6 @@ class Main(QMainWindow, Ui_MainWindow):
         self.dev_groupBox.layout().addWidget(stepsSpinBox,row,3,1,1)
 
         checkBox.toggled.connect(self.add_param)
-        doubleSpinBox.valueChanged.connect(self.read_deltas)
-        stepsSpinBox.valueChanged.connect(self.read_steps)
 
         
     def remove_device(self):
@@ -420,6 +413,8 @@ class Main(QMainWindow, Ui_MainWindow):
 
     def generate_ramp_list(self):
         self.ramplist = []
+        self.read_deltas()
+        self.read_steps()
         self.read_phases()
         numevents = self.numevents_spinBox.value()
         if self.oneD_radioButton.isChecked():
