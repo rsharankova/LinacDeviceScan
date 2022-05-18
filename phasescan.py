@@ -365,11 +365,12 @@ class phasescan:
                 tmplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))
                 param_dict[dev]['phase']=phase
 
-        tmplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))
         ramplist=[]
         for l in tmplist:
             for i in range(numevents):
                 ramplist.append(l.copy())
+            
+        ramplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))
         ramplist[0][0]='0'
         return ramplist
     
@@ -382,8 +383,7 @@ class phasescan:
         ramp = [None]*len(limits)
         self.do_loop(len(limits),limits,numevents,ramp,ramplist)
 
-        for k in range(numevents):
-            ramplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))
+        ramplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))
 
         ramplist[0][0]='0'
         return ramplist
