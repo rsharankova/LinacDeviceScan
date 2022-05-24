@@ -359,7 +359,6 @@ class phasescan:
             steps= -1 if param_dict[dev]['delta']==0 else param_dict[dev]['steps']
 
             ramp=[phase-param_dict[dev]['delta']+2*param_dict[dev]['delta']/steps*i for i in range(steps+1)]
-            ramp=[val for val in ramp if val!=phase]
             for val in ramp:
                 param_dict[dev]['phase']=val
                 tmplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))
