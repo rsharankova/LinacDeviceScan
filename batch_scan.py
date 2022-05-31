@@ -39,9 +39,11 @@ def main():
     
     ramplist = []
     thread = 'scanner'
+
+    timeout = 3540 #59 min
     
     try:
-        ps.start_thread('%s'%thread,drf_list,ramplist,ps.role,Nmeas)
+        ps.start_thread('%s'%thread,timeout,drf_list,ramplist,ps.role,Nmeas)
         
     except Exception as e:
         print('Scan failed',e)

@@ -41,20 +41,26 @@ async def set_many(con,thread_context):
             one_data = [None]*len(thread_context['param_list'])
             setpairs = list(enumerate([n for n in rr if isinstance(n,float)]))
             await dpm.apply_settings(setpairs)
-        
-            async for reply in dpm:
-                if thread_context['stop'].is_set():
-                    break
-                thread_context["pause"].wait()
-                if reply.isReading:
-                    one_data[reply.tag]= reply.data
-                    with thread_context['lock']:
-                        #thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
-                        thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,
-                                                       'name':thread_context['param_list'][reply.tag].split('@')[0]})
-                if one_data.count(None)==0:
-                    break
+
+            try:
+                async for reply in dpm.replies(tmo=float(thread_context['timeout'])):
+                    if thread_context['stop'].is_set():
+                        break
+                    thread_context["pause"].wait()
+                    if reply.isReading:
+                        one_data[reply.tag]= reply.data
+                        with thread_context['lock']:
+                            #thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
+                            thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,
+                                                           'name':thread_context['param_list'][reply.tag].split('@')[0]})
+                    if one_data.count(None)==0:
+                        break                    
+
+            except Exception as e:
+                print(repr(e))
+                
         print("Ended ramp")
+        
     return None
 
 async def read_once(con,drf_list):
@@ -80,27 +86,33 @@ async def read_many(con, thread_context):
 
         it = int(thread_context['Nmeas'])*len(thread_context['param_list'])
         await dpm.start()
-        async for reply in dpm:
-            if thread_context['stop'].is_set():
-                break
-            thread_context["pause"].wait()
-            if reply.isReading:
-                it = it-1
-                with thread_context['lock']:
-                    #thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
-                    thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,
-                                                   'name':thread_context['param_list'][reply.tag].split('@')[0]})
-                    if (len(thread_context['data'])>5000000):
-                        print("Buffer overflow, deleting",thread_context['data'][0]['name'],thread_context['data'][0]['name'])
-                        thread_context['data'].pop(0)
-            elif reply.isStatus:
-                print(f'Status: {reply}')
-            else:
-                print(f'Unknown response: {reply}')
-            if it==0:
-                thread_context['stop'].set()
+        try:
+            async for reply in dpm.replies(tmo=float(thread_context['timeout'])):
 
-        print('Ending read_many loop')
+                if thread_context['stop'].is_set():
+                    break
+                thread_context["pause"].wait()
+                if reply.isReading:
+                    it = it-1
+                    with thread_context['lock']:
+                        #thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,'name':reply.meta['name']})
+                        thread_context['data'].append({'tag':reply.tag,'stamp':reply.stamp,'data': reply.data,
+                                                   'name':thread_context['param_list'][reply.tag].split('@')[0]})
+                        if (len(thread_context['data'])>5000000):
+                            print("Buffer overflow, deleting",thread_context['data'][0]['name'],thread_context['data'][0]['name'])
+                            thread_context['data'].pop(0)
+                elif reply.isStatus:
+                    print(f'Status: {reply}')
+                else:
+                    print(f'Unknown response: {reply}')
+                if it==0:
+                    thread_context['stop'].set()
+
+                
+            print('Ending read_many loop')
+        except Exception as e:
+            print(repr(e))
+
 
 class phasescan:
     def __init__(self):
@@ -192,8 +204,10 @@ class phasescan:
             else:
                 acsys.run_client(set_many, thread_context=self.thread_dict[thread_name])
         finally:
-            event_loop.close()
+            if event_loop.is_running():
+                event_loop.close()
             self.thread_dict[thread_name]['stop'].set()
+
             
     def _acnet_daq(self, thread_name):
         """Run the ACNet DAQ."""
@@ -212,7 +226,7 @@ class phasescan:
             self.thread_dict[thread_name]['data'].clear()
             return data
 
-    def start_thread(self, thread_name, param_list, ramp_list, role, Nmeas):
+    def start_thread(self, thread_name, timeout, param_list, ramp_list, role, Nmeas):
         """Start the thread."""
         print('Starting thread', thread_name)
         daq_thread = threading.Thread(
@@ -223,6 +237,7 @@ class phasescan:
         self.thread_dict[thread_name] = {
             'thread': daq_thread,
             'lock': threading.Lock(),
+            'timeout': timeout,
             'data': [],
             'param_list': param_list,
             'ramp_list':ramp_list,

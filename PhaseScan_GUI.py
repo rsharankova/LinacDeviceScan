@@ -468,8 +468,9 @@ class Main(QMainWindow, Ui_MainWindow):
 
         drf_list = set_list+['%s%s'%(l,evt) for l in self.read_list if len(self.read_list)!=0]
 
+        timeout = 600 # 10 minutes
         try:
-            self.phasescan.start_thread('%s'%self.thread,drf_list,self.ramplist,self.phasescan.role,numevents)
+            self.phasescan.start_thread('%s'%self.thread,timeout,drf_list,self.ramplist,self.phasescan.role,numevents)
 
         except Exception as e:
             print('Scan failed',e)
@@ -759,7 +760,7 @@ class TimePlot(QDialog):
             self.xaxes = [np.array([]) for i in range(len(self.selected))]
             self.yaxes = [np.array([]) for i in range(len(self.selected))]
             self.timer.start()
-            self.parent().phasescan.start_thread('%s'%self.thread,self.selected,'','',-1)
+            self.parent().phasescan.start_thread('%s'%self.thread,30,self.selected,'','',-1)
         elif self.plot_pushButton.isChecked()==False: 
             self.timer.stop()
             self.parent().phasescan.stop_thread('%s'%self.thread)
@@ -923,7 +924,7 @@ class BarPlot(QDialog):
     def toggle_plot(self):
         if self.plot_pushButton.isChecked() and len(self.selected)>0:
             self.timer.start()
-            self.parent().phasescan.start_thread('%s'%self.thread,self.selected,'','',-1)
+            self.parent().phasescan.start_thread('%s'%self.thread,30,self.selected,'','',-1)
         elif self.plot_pushButton.isChecked()==False: 
             self.timer.stop()
             self.parent().phasescan.stop_thread('%s'%self.thread)
