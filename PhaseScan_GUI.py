@@ -13,6 +13,8 @@ from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mt
 
+import os
+
 from matplotlib.backends.backend_qtagg import (
     FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
@@ -77,8 +79,8 @@ class Main(QMainWindow, Ui_MainWindow):
         self.read_list = []
         self.scanresults = []
         self.phasescan = phasescan()
-        self.event_comboBox.addItems(['default','15Hz','52','53','0a'])
-        self.evt_dict = {'default':'','15Hz':'@p,15000','52':'@e,52,e,0','53':'@e,53,e,0','0a':'@e,0a,e,0'}
+        self.event_comboBox.addItems(['default','15Hz','52','53','0a','1d','1c','12'])
+        self.evt_dict = {'default':'','15Hz':'@p,15000','52':'@e,52,e,0','53':'@e,53,e,0','0a':'@e,0a,e,0','1d':'@e,1d,e,0','1c':'@e,1c,e,0','12':'@e,12,e,0'}
 
         #### FILTER MODEL ####
         self.model = ItemModel(self.phasescan.dev_list)
@@ -181,7 +183,8 @@ class Main(QMainWindow, Ui_MainWindow):
 
         ### RAMP LIST BUTTONS ###
         self.genList_pushButton.clicked.connect(self.generate_ramp_list)
-        self.displayList_pushButton.clicked.connect(self.display_list)
+        #self.displayList_pushButton.clicked.connect(self.display_list)
+        self.readList_pushButton.clicked.connect(self.read_ramp_list)
         self.writeList_pushButton.clicked.connect(self.write_list)
 
         ### PLOT BUTTONS ###
@@ -427,18 +430,21 @@ class Main(QMainWindow, Ui_MainWindow):
                self.ramplist = self.phasescan.make_loop_ramp_list(self.phasescan.param_dict,numevents)
            except:
                print('Cannot generate nested ramp list.')
+
+        self.display_list()
                
     def write_list(self):        
         if not self.list_plainTextEdit.toPlainText():
             print('Using default filename')
             self.list_plainTextEdit.setPlainText('ramplist.csv')
         filename = self.list_plainTextEdit.toPlainText()
+        
         try:
             output = open(r'%s'%filename,'w', newline='' )
             output.writelines(["%s\n"%(','.join([str(l) for l in line])) for line in self.ramplist])
             output.close()
             print('Wrote %s to disk'%filename)
-
+        
         except:
             print('Something went wrong')
 
@@ -446,7 +452,28 @@ class Main(QMainWindow, Ui_MainWindow):
         for line in self.ramplist:
             print(','.join([str(l) for l in line]))
 
+    def read_ramp_list(self):
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open ramp file',
+                                               '', "CSV files (*.csv )")
+        print('The file name is...', fname)
+        ramplist = []
+        try:
+            corr_file = open(r'%s'%fname)
+            lines = corr_file.readlines()
 
+            for line in lines:
+                if line.find('//')!=-1:
+                    continue
+                elif line =='':
+                    continue
+                ll = line.strip('\n').split(',')
+                ramplist.append([ll[0],ll[1],float(ll[2]),ll[3],float(ll[4])])
+            self.ramplist = ramplist
+        except:
+            print('Something went wrong')
+
+        self.display_list()
+            
     def reading(self):
         if not self.read_plainTextEdit.toPlainText():
             print('Using default filename')

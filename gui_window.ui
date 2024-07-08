@@ -389,8 +389,17 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="minimum">
+           <double>-400.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>400.000000000000000</double>
+          </property>
           <property name="singleStep">
-           <double>0.500000000000000</double>
+           <double>1.000000000000000</double>
           </property>
          </widget>
          <widget class="QSpinBox" name="steps_spinBox_1">
@@ -409,10 +418,10 @@
            </sizepolicy>
           </property>
           <property name="minimum">
-           <number>2</number>
+           <number>1</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>1000</number>
           </property>
          </widget>
          <widget class="QCheckBox" name="dev_checkBox_2">
@@ -476,8 +485,17 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="minimum">
+           <double>-400.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>400.000000000000000</double>
+          </property>
           <property name="singleStep">
-           <double>0.500000000000000</double>
+           <double>1.000000000000000</double>
           </property>
          </widget>
          <widget class="QSpinBox" name="steps_spinBox_2">
@@ -496,10 +514,10 @@
            </sizepolicy>
           </property>
           <property name="minimum">
-           <number>2</number>
+           <number>1</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>1000</number>
           </property>
          </widget>
          <widget class="QCheckBox" name="dev_checkBox_3">
@@ -557,8 +575,17 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="minimum">
+           <double>-400.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>400.000000000000000</double>
+          </property>
           <property name="singleStep">
-           <double>0.500000000000000</double>
+           <double>1.000000000000000</double>
           </property>
          </widget>
          <widget class="QSpinBox" name="steps_spinBox_3">
@@ -577,10 +604,10 @@
            </sizepolicy>
           </property>
           <property name="minimum">
-           <number>2</number>
+           <number>1</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>1000</number>
           </property>
          </widget>
          <widget class="QCheckBox" name="dev_checkBox_4">
@@ -638,8 +665,17 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="minimum">
+           <double>-400.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>400.000000000000000</double>
+          </property>
           <property name="singleStep">
-           <double>0.500000000000000</double>
+           <double>1.000000000000000</double>
           </property>
          </widget>
          <widget class="QSpinBox" name="steps_spinBox_4">
@@ -658,10 +694,10 @@
            </sizepolicy>
           </property>
           <property name="minimum">
-           <number>2</number>
+           <number>1</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>1000</number>
           </property>
          </widget>
          <widget class="QCheckBox" name="dev_checkBox_5">
@@ -719,8 +755,17 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="minimum">
+           <double>-400.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>400.000000000000000</double>
+          </property>
           <property name="singleStep">
-           <double>0.500000000000000</double>
+           <double>1.000000000000000</double>
           </property>
          </widget>
          <widget class="QSpinBox" name="steps_spinBox_5">
@@ -739,10 +784,10 @@
            </sizepolicy>
           </property>
           <property name="minimum">
-           <number>2</number>
+           <number>1</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>1000</number>
           </property>
          </widget>
          <widget class="QCheckBox" name="dev_checkBox_6">
@@ -800,8 +845,17 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="minimum">
+           <double>-400.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>400.000000000000000</double>
+          </property>
           <property name="singleStep">
-           <double>0.500000000000000</double>
+           <double>1.000000000000000</double>
           </property>
          </widget>
          <widget class="QSpinBox" name="steps_spinBox_6">
@@ -820,10 +874,10 @@
            </sizepolicy>
           </property>
           <property name="minimum">
-           <number>2</number>
+           <number>1</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>1000</number>
           </property>
          </widget>
          <widget class="QCheckBox" name="dev_checkBox_7">
@@ -881,8 +935,17 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="minimum">
+           <double>-400.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>400.000000000000000</double>
+          </property>
           <property name="singleStep">
-           <double>0.500000000000000</double>
+           <double>1.000000000000000</double>
           </property>
          </widget>
          <widget class="QSpinBox" name="steps_spinBox_7">
@@ -901,10 +964,10 @@
            </sizepolicy>
           </property>
           <property name="minimum">
-           <number>2</number>
+           <number>1</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>1000</number>
           </property>
          </widget>
         </widget>
@@ -997,8 +1060,17 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="decimals">
+           <number>2</number>
+          </property>
+          <property name="minimum">
+           <double>-1000.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
           <property name="singleStep">
-           <double>0.500000000000000</double>
+           <double>0.100000000000000</double>
           </property>
          </widget>
          <widget class="QLabel" name="label_4">
@@ -1074,10 +1146,10 @@
            </sizepolicy>
           </property>
           <property name="minimum">
-           <number>2</number>
+           <number>1</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>1000</number>
           </property>
          </widget>
          <widget class="QCheckBox" name="dev_checkBox_8">
@@ -1229,6 +1301,12 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="minimum">
+           <double>-100.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>100.000000000000000</double>
+          </property>
          </widget>
          <widget class="QSpinBox" name="cube_steps_spinBox_1">
           <property name="geometry">
@@ -1246,7 +1324,7 @@
            </sizepolicy>
           </property>
           <property name="minimum">
-           <number>2</number>
+           <number>1</number>
           </property>
          </widget>
          <widget class="QCheckBox" name="cube_checkBox_2">
@@ -1283,6 +1361,12 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="minimum">
+           <double>-100.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>100.000000000000000</double>
+          </property>
          </widget>
          <widget class="QSpinBox" name="cube_steps_spinBox_2">
           <property name="geometry">
@@ -1300,7 +1384,7 @@
            </sizepolicy>
           </property>
           <property name="minimum">
-           <number>2</number>
+           <number>1</number>
           </property>
          </widget>
          <widget class="QCheckBox" name="cube_checkBox_3">
@@ -1331,6 +1415,12 @@
             <height>24</height>
            </rect>
           </property>
+          <property name="minimum">
+           <double>-100.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>100.000000000000000</double>
+          </property>
          </widget>
          <widget class="QSpinBox" name="cube_steps_spinBox_3">
           <property name="geometry">
@@ -1348,7 +1438,7 @@
            </sizepolicy>
           </property>
           <property name="minimum">
-           <number>2</number>
+           <number>1</number>
           </property>
          </widget>
          <widget class="QComboBox" name="cube_comboBox_1">
@@ -1458,9 +1548,9 @@
         <enum>QLayout::SetDefaultConstraint</enum>
        </property>
        <item row="0" column="1">
-        <widget class="QPushButton" name="displayList_pushButton">
+        <widget class="QPushButton" name="readList_pushButton">
          <property name="text">
-          <string>Display list</string>
+          <string>Read ramp list</string>
          </property>
         </widget>
        </item>

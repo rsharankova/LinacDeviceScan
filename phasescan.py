@@ -40,6 +40,7 @@ async def set_many(con,thread_context):
         for rr in thread_context['ramp_list']:
             one_data = [None]*len(thread_context['param_list'])
             setpairs = list(enumerate([n for n in rr if isinstance(n,float)]))
+            print(setpairs)
             await dpm.apply_settings(setpairs)
 
             try:
@@ -140,6 +141,7 @@ class phasescan:
 
         self.debug_role='testing'
         self.main_role='linac_daily_rf_tuning'
+        #self.main_role='linac_trims'
         self.role=self.main_role
 
         self.dev_list = self.read_dev_list()
@@ -383,8 +385,10 @@ class phasescan:
         for l in tmplist:
             for i in range(numevents):
                 ramplist.append(l.copy())
-            
+
         ramplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))
+        #[ramplist.append(sum([[val['device'],val['phase']] for key,val in param_dict.items() if val['selected']==True],['1']))]
+
         ramplist[0][0]='0'
         return ramplist
     
