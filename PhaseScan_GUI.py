@@ -192,6 +192,9 @@ class Main(QMainWindow, Ui_MainWindow):
         self.loss_pushButton.clicked.connect(self.barLosses)
         self.current_pushButton.clicked.connect(self.barTors)
         self.barplot_pushButton.clicked.connect(self.barPlot)
+        #self.loss_pushButton.clicked.connect(self.barBPH)
+        #self.current_pushButton.clicked.connect(self.barBPV)
+        #self.barplot_pushButton.clicked.connect(self.barBF)
 
         ### SCAN BUTTONS ###
         self.startScan_pushButton.clicked.connect(self.start_scan)
@@ -567,6 +570,30 @@ class Main(QMainWindow, Ui_MainWindow):
         selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in self.phasescan.TORs]
         if len(selected)>0:
             dlg = BarPlot(selected,evt,'current',self)
+            dlg.show()
+
+    def barBPH(self):
+        evt = self.event_comboBox.currentText()
+        selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in self.phasescan.BPHs]
+        print(selected)
+        if len(selected)>0:
+            dlg = BarPlot(selected,evt,'bph',self)
+            dlg.show()
+
+    def barBPV(self):
+        evt = self.event_comboBox.currentText()
+        selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in self.phasescan.BPVs]
+        print(selected)
+        if len(selected)>0:
+            dlg = BarPlot(selected,evt,'bpv',self)
+            dlg.show()
+
+    def barBF(self):
+        evt = self.event_comboBox.currentText()
+        selected = ['%s%s'%(sel,self.evt_dict[evt]) for sel in self.phasescan.BFs]
+        print(selected)
+        if len(selected)>0:
+            dlg = BarPlot(selected,evt,'bf',self)
             dlg.show()
 
 

@@ -125,6 +125,23 @@ class phasescan:
                     'L:D31LM','L:D32LM','L:D33LM','L:D34LM','L:D41LM','L:D42LM','L:D43LM','L:D44LM',
                     'L:D51LM','L:D52LM','L:D53LM','L:D54LM','L:D61LM','L:D62LM','L:D63LM','L:D64LM',
                     'L:D71LM','L:D72LM','L:D73LM','L:D74LM','L:DELM1','L:DELM2','L:DELM3','L:DELM4','L:DELM5','L:DELM7','L:DELM9',]
+
+        self.BPHs = ['L:D61BPH','L:D62BPH','L:D63BPH','L:D64BPH',
+                    'L:D71BPH','L:D72BPH','L:D73BPH','L:D74BPH',]
+        #self.BPHs.extend(['B:HPLAM','B:HPDEB','B:HPINJ'])
+        self.BPHs.append('B:HPLAM')
+        [self.BPHs.append('B:HPQ%d'%i) for i in range(2,18) if i!=11]
+        
+        self.BPVs = ['L:D61BPV','L:D62BPV','L:D63BPV','L:D64BPV',
+                    'L:D71BPV','L:D72BPV','L:D73BPV','L:D74BPV',]
+        self.BPVs.append('B:VPLAM')
+        [self.BPVs.append('B:VPQ%d'%i) for i in range(2,18)]
+
+        self.BFs = ['L:D61BF','L:D62BF','L:D63BF','L:D64BF',
+                    'L:D71BF','L:D72BF','L:D73BF','L:D74BF',]
+        self.BFs.append('B:BLAMF')
+        [self.BFs.append('B:BQ%dF'%i) for i in range(2,18)]
+
         
         self.main_dict = {'RFQPAH':{'device':'L:RFQPAH','idx':1,'selected':False,'phase':0,'delta':0,'steps':2},
                           'RFBPAH':{'device':'L:RFBPAH','idx':2,'selected':False,'phase':0,'delta':0,'steps':2},
@@ -329,6 +346,7 @@ class phasescan:
 
     def fill_write_dataframe(self,data,read_list,filename):
         df = pd.DataFrame.from_records(data)
+        #print(df.head())
         devlist = df.name.unique()
         dflist=[]
         for dev in read_list:
